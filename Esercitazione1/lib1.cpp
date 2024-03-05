@@ -4,6 +4,10 @@
 using namespace std;
 
 int BinSearchInt(int l, int r, double k, vector<double> &maxs, int M){
+    if(k<l || k>r){
+        cerr << "Errore: intervallo invalido esaminato da BinSearchInt." << endl;
+        return -1;
+    }
     if(l==0 && 0.<=k && k<maxs[0]){  /*maxs[0] contiene il massimo del primo intervallo quindi se k sta nel primo intervallo serve un caso a parte*/
         return l;
     }
@@ -47,6 +51,9 @@ void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
         
         for(int j=0; j<L; j++){    /*ogni iterazione completa l'i-esimo blocco*/
             double r=rand.Rannyu();
+            if(r<0 || r>1){
+                cerr << "Errore: estrazione invalida in DataAveVar." << endl;
+            }
             av+=r;
             vav+=(r-0.5)*(r-0.5);
         }
@@ -54,12 +61,19 @@ void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
         /*dati figura 1*/
         av/=L;
         BlockMean(av, sumbs, avbs, i);
-        aout << avbs[0] << " " << BlockError(avbs, i) << endl;  /*uso BlockError per calcolare la barra d'errore con il metodo a blocchi*/
+        if(aout.is_open()){
+            aout << avbs[0] << " " << BlockError(avbs, i) << endl;  /*uso BlockError per calcolare la barra d'errore con il metodo a blocchi*/
+        } 
+        else cerr << "Errore: impossibile aprire average.dat" << endl;
+
         /*dati figura 2*/
         vav/=L;
         BlockMean(vav, vsumbs, vavbs, i);
-        vout << vavbs[0] << " " << BlockError(vavbs, i) << endl;
-
+        if(vout.is_open()){
+            vout << vavbs[0] << " " << BlockError(vavbs, i) << endl;
+        } 
+        else cerr << "Errore: impossibile aprire variance.dat" << endl;
+        
         rand.SaveSeed();
     }
 }
@@ -94,11 +108,19 @@ void DataChiQuad(int M, int N, ofstream& chiout){
         
         for(int j=0; j<N; j++){
             double r=rand.Rannyu();
+            if(r<0 || r>1){
+                cerr << "Errore: estrazione invalida in DataChiQuad." << endl;
+            }
+
             SearchInt(M, r, maxs, counts);    /*funzione che cerca il sottointervallo a cui appartiene il numero estratto e aggiorna il conteggio relativo*/
         }
-        
         double chi=ChiSqu(M, N, counts);  /*i-esimo chi quadro calcolato con una funzione apposita*/
-        chiout << chi << endl;  /*dato che poi plotterò*/
+
+        if(chiout.is_open()){
+            chiout << chi << endl;  /*dato che poi plotterò*/
+        } 
+        else cerr << "Errore: impossibile aprire chiquad.dat" << endl;
+        
     }
 
     rand.SaveSeed();
@@ -119,13 +141,25 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
                 unifs[j]+=rand.Rannyu(1., 6.);   /*distribuzione uniforme fra 1 e 6*/
                 exps[j]+=rand.Exp(1.);     /*distribuzione esponenziale con lambda=1*/
                 lors[j]+=rand.Lorentz(0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
+                if(unifs[j]<1 || unifs[j]>6 || exps[j]<0 ){
+                    cerr << "Errore: estrazione invalida in DataDistr." << endl;
+                }
                 k++;
             }
         }
-        uniout << unifs[0] << " " << unifs[1] << " " << unifs[2] << " " << unifs[3] << " " << endl;
-        eout << exps[0] << " " << exps[1] << " " << exps[2] << " " << exps[3] << " " << endl;
-        lorout << lors[0] << " " << lors[1] << " " << lors[2] << " " << lors[3] << " " << endl;
 
+        if(uniout.is_open()){
+            uniout << unifs[0] << " " << unifs[1] << " " << unifs[2] << " " << unifs[3] << " " << endl;
+        } 
+        else cerr << "Errore: impossibile aprire unifdist.dat" << endl;
+        if(eout.is_open()){
+            eout << exps[0] << " " << exps[1] << " " << exps[2] << " " << exps[3] << " " << endl;
+        }
+        else cerr << "Errore: impossibile aprire expdist.dat" << endl;
+        if(lorout.is_open()){
+            lorout << lors[0] << " " << lors[1] << " " << lors[2] << " " << lors[3] << " " << endl;
+        }
+        else cerr << "Errore: impossibile aprire lordist.dat" << endl;
     }
 
     rand.SaveSeed();    
@@ -170,6 +204,10 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
     InizRandom(rand);
 
     int Nl=P/D;   /*numero di linee nel piano*/
+    if(P%D!=0){
+        cout << "Attenzione: Nlinee=Pbuf/Dbuf è stato arrotondato." << endl;
+    }
+
     vector<double> maxs(Nl, 0.); /*contiene l'estremo superiore di ogni intervallo*/
     for(int m=0; m<Nl; m++){
         maxs[m]=(m+1)*D;
@@ -186,7 +224,10 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
             starts[0]=rand.Rannyu(0., P);   /*genero coordinata x della punta dell'ago, distribuita uniformemente nel piano*/
             starts[1]=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano*/
             double ct=rand.Rannyu(-1, 1);   /*genero coseno dell'angolo theta fra asse x e ago, distribuito uniformemente fra -1 e 1*/
-            
+            if(starts[0]<0 || starts[0]>P || starts[1]<0 || starts[1]>P || ct<-1 || ct> 1){
+                cerr << "Errore: estrazione invalida in DataBuffon." << endl;
+            }
+
             vector<double> ends(2, 0.);
             EndNeedle(starts, ct, L, ends);    /*calcola coordinate dell'altra punta dell'ago*/
             if(ends[0]<=P && ends[1]<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
@@ -196,9 +237,16 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
                 }
             }
         }
+        if(Nbuf==0){
+            cerr << "Errore: Nbuf risultante dal blocco " << j << " è nullo, impossibile completare correttamente DataBuffon." << endl;
+        }
         double value=(2*L*T)/(Nbuf*D);   /*stima del pigreco data dal solo j-simo blocco*/
         BlockMean(value, sumbs, valuebs, j);
-        bout << valuebs[0] << " " << BlockError(valuebs, j) << endl;
+        
+        if(bout.is_open()){
+            bout << valuebs[0] << " " << BlockError(valuebs, j) << endl;
+        }
+        else cerr << "Errore: impossibile aprire buffon.dat" << endl;
     }
 
     rand.SaveSeed();   

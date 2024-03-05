@@ -32,8 +32,11 @@ double Random :: Gauss(double mean, double sigma) {
 }
 
 double Random :: Exp(double lambda) {  /*distribuzione esponenziale*/
-   double r=Rannyu();
-   return -(1/lambda)*log(1.-r);
+   double e=-(1/lambda)*log(1.-Rannyu());
+   if(e<0){
+      cerr << "Errore: estrazione invalida di rand.Exp()." << endl;
+   }
+   return e;
 }
 
 double Random :: Lorentz(double mu, double gamma) {  /*distribuzione Cauchy-Lorentz*/
@@ -43,27 +46,34 @@ double Random :: Lorentz(double mu, double gamma) {  /*distribuzione Cauchy-Lore
 
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
-   return min+(max-min)*Rannyu();
+   double r=min+(max-min)*Rannyu();
+   if(r<min || r>max){
+      cerr << "Errore: estrazione invalida di Rannyu(min, max)." << endl;
+   }
+   return r;
 }
 
 double Random :: Rannyu(void){
-  // This function generates a random number in the range [0,1)
-  const double twom12=0.000244140625;
-  int i1,i2,i3,i4;
-  double r;
+   // This function generates a random number in the range [0,1)
+   const double twom12=0.000244140625;
+   int i1,i2,i3,i4;
+   double r;
 
-  i1 = l1*m4 + l2*m3 + l3*m2 + l4*m1 + n1;
-  i2 = l2*m4 + l3*m3 + l4*m2 + n2;
-  i3 = l3*m4 + l4*m3 + n3;
-  i4 = l4*m4 + n4;
-  l4 = i4%4096;
-  i3 = i3 + i4/4096;
-  l3 = i3%4096;
-  i2 = i2 + i3/4096;
-  l2 = i2%4096;
-  l1 = (i1 + i2/4096)%4096;
-  r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
-  return r;
+   i1 = l1*m4 + l2*m3 + l3*m2 + l4*m1 + n1;
+   i2 = l2*m4 + l3*m3 + l4*m2 + n2;
+   i3 = l3*m4 + l4*m3 + n3;
+   i4 = l4*m4 + n4;
+   l4 = i4%4096;
+   i3 = i3 + i4/4096;
+   l3 = i3%4096;
+   i2 = i2 + i3/4096;
+   l2 = i2%4096;
+   l1 = (i1 + i2/4096)%4096;
+   r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
+   if(r<0 || r>1){
+      cerr << "Errore: estrazione invalida di Rannyu()." << endl;
+   }
+   return r;
 }
 
 void Random :: SetRandom(int * s, int p1, int p2){
