@@ -1,13 +1,3 @@
-/****************************************************************
-*****************************************************************
-    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
-   _/_/  _/ _/       _/       Physics Department
-  _/  _/_/    _/    _/       Universita' degli Studi di Milano
- _/    _/       _/ _/       Prof. D.E. Galli
-_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
-*****************************************************************
-*****************************************************************/
-
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -41,6 +31,16 @@ double Random :: Gauss(double mean, double sigma) {
    return mean + x * sigma;
 }
 
+double Random :: Exp(double lambda) {  /*distribuzione esponenziale*/
+   double r=Rannyu();
+   return -(1/lambda)*log(1.-r);
+}
+
+double Random :: Lorentz(double mu, double gamma) {  /*distribuzione Cauchy-Lorentz*/
+   double r=Rannyu();
+   return gamma*tan(M_PI*(r-0.5))+mu;
+}
+
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
    return min+(max-min)*Rannyu();
@@ -63,7 +63,6 @@ double Random :: Rannyu(void){
   l2 = i2%4096;
   l1 = (i1 + i2/4096)%4096;
   r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
-
   return r;
 }
 
@@ -84,13 +83,3 @@ void Random :: SetRandom(int * s, int p1, int p2){
 
   return;
 }
-
-/****************************************************************
-*****************************************************************
-    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
-   _/_/  _/ _/       _/       Physics Department
-  _/  _/_/    _/    _/       Universita' degli Studi di Milano
- _/    _/       _/ _/       Prof. D.E. Galli
-_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
-*****************************************************************
-*****************************************************************/

@@ -1,75 +1,13 @@
 #include "lib1.h"
+#include "../libGen.h"
 
 using namespace std;
 
-
-float Rarandom(){
-    random_device rd;  // Will be used to obtain a seed for the random number engine
-    mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-    uniform_real_distribution<> dis(0., 1.);
-    return dis(gen);
-}
-
-
-float BlockError(float val, float val2, int B){
-    if(B==0){   /*il primo blocco ha errore 0*/
-        return 0;
-    }
-    else{
-        return sqrt((val2-(val*val))/B);   /*barra d'errore sul B-esimo blocco*/
-    }
-}
-
-void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
-    /*Inizializzazione del generatore di numeri casuali*/
-    Random rand;
-    InizRandom(rand);
-
-    /*variabili usate per la figura 1 (grafico relativo al valor medio)*/
-    float avb;  /*alla i-esima iterazione, valor medio cumulativo dei primi i blocchi*/
-    float av2b;  /*alla i-esima iterazione, quadrato del valor medio cumulativo dei primi i blocchi*/
-    float sumb=0;  /*alla i-esima iterazione, somma dei valori medi dei primi i blocchi*/
-    float sum2b=0;  /*alla i-esima iterazione, somma dei quadrati dei valori medi dei primi i blocchi*/
-    /*variabili usate per la figura 2 (grafico relativo alla varianza)*/
-    float vavb;   /*corrispettivo di avb per la figura 2*/
-    float vav2b;   /*corrispettivo di av2b per la figura 2*/
-    float vsumb=0; /*corrispettivo di sumb per la figura 2*/
-    float vsum2b=0;   /*corrispettivo di sum2bb per la figura 2*/
-    
-    for(int i=0; i<N; i++){    /*itero sui blocchi*/
-        /*variabili per la figura 1*/
-        float av=0;   /*valor medio dell'i-esimo blocco*/
-        /*variabili per la figura 2*/
-        float vav=0;   /*valor medio delle varianze calcolate per l'i-esimo blocco*/
-        for(int j=0; j<L; j++){    /*ogni iterazione completa l'i-esimo blocco*/
-            float r=Rarandom();
-            av+=r;
-            vav+=(r-0.5)*(r-0.5);
-        }
-        /*dati figura 1*/
-        av/=L;
-        sumb+=av;
-        sum2b+=av*av;
-        avb=sumb/(i+1);
-        av2b=sum2b/(i+1);
-        aout << avb << " " << BlockError(avb, av2b, i) << endl;  /*uso BlockError per calcolare la barra d'errore con il metodo a blocchi*/
-        /*dati figura 2*/
-        vav/=L;
-        vsumb+=vav;
-        vsum2b+=vav*vav;
-        vavb=vsumb/(i+1);
-        vav2b=vsum2b/(i+1);
-        vout << vavb << " " << BlockError(vavb, vav2b, i) << endl;
-    }
-      
-    rand.SaveSeed();
-}
-
-int BinSearchInt(int l, int r, float k, float* maxs, int M){
+int BinSearchInt(int l, int r, double k, vector<double> &maxs, int M){
     if(l==0 && 0.<=k && k<maxs[0]){  /*maxs[0] contiene il massimo del primo intervallo quindi se k sta nel primo intervallo serve un caso a parte*/
         return l;
     }
-    if(r==M && k==maxs[r]){    /*devo esaminare [0, M] ma sto valutando insiemi aperti [a, b) ergo l'ultimo sottointervallo lo valuto a parte in modo che sia chiuso e copro tutto*/
+    if(r==M && k==maxs[r]){    /*devo esaminare [0, M] ma sto valutando insiemi aperti [a, b) ergo qua chiudo l'ultimo sottointervallo*/
         return r;
     }
     if((r-l)==1 && maxs[l]<=k && k<maxs[r]){     /*caso base dell'algoritmo divide et impera*/
@@ -89,77 +27,121 @@ int BinSearchInt(int l, int r, float k, float* maxs, int M){
     }
 }
 
-void SearchInt(int M, float r, float* maxs, int* counts){
+void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
+    /*Inizializzazione del generatore di numeri casuali*/
+    Random rand;
+    InizRandom(rand);
+
+    /*variabili usate per la figura 1 (grafico relativo al valor medio)*/
+    vector<double> avbs(2, 0.);  /*alla i-esima iterazione, valor medio cumulativo dei primi i blocchi e suo quadrato*/
+    vector<double> sumbs(2, 0.);  /*alla i-esima iterazione, somma dei valori medi dei primi i blocchi e dei quadrati*/
+    /*variabili usate per la figura 2 (grafico relativo alla varianza)*/
+    vector<double> vavbs(2, 0.);   /*corrispettivo di avbs per la figura 2*/
+    vector<double> vsumbs(2, 0.);; /*corrispettivo di sumbs per la figura 2*/
+
+    for(int i=0; i<N; i++){    /*itero sui blocchi*/
+        /*variabili per la figura 1*/
+        double av=0;   /*valor medio dell'i-esimo blocco*/
+        /*variabili per la figura 2*/
+        double vav=0;   /*valor medio delle varianze calcolate per l'i-esimo blocco*/
+        
+        for(int j=0; j<L; j++){    /*ogni iterazione completa l'i-esimo blocco*/
+            double r=rand.Rannyu();
+            av+=r;
+            vav+=(r-0.5)*(r-0.5);
+        }
+
+        /*dati figura 1*/
+        av/=L;
+        BlockMean(av, sumbs, avbs, i);
+        aout << avbs[0] << " " << BlockError(avbs, i) << endl;  /*uso BlockError per calcolare la barra d'errore con il metodo a blocchi*/
+        /*dati figura 2*/
+        vav/=L;
+        BlockMean(vav, vsumbs, vavbs, i);
+        vout << vavbs[0] << " " << BlockError(vavbs, i) << endl;
+
+        rand.SaveSeed();
+    }
+}
+
+void SearchInt(int M, double r, vector<double> &maxs, vector<int> &counts){
     int ind=BinSearchInt(0, M, r, maxs, M);
     counts[ind]++;
 }
 
-float ChiSqu(int M, int N, int* counts){
-    int E=N/M;
-    float chi=0.;
+double ChiSqu(int M, int N, vector<int> &counts){
+    int E=N/M;  /*valore atteso*/
+    double chi=0.;
     for(int i=0; i<M; i++){
-        chi+=(counts[i]-E)*(counts[i]-E);
+        chi+=(counts[i]-E)*(counts[i]-E);   /*calcolo del numeratore del chi2*/
     }
-    chi/=E;
-    return chi;
+    return chi/E;
 }
 
 void DataChiQuad(int M, int N, ofstream& chiout){
-    
-    Random rand;   /*Inizializzazione del generatore di numeri casuali*/
+    /*Inizializzazione del generatore di numeri casuali*/
+    Random rand;   
     InizRandom(rand);
 
-    float I=1./M;   /*ampiezza di ogni sottointervallo*/
-    float maxs[M]; /*contiene l'estremo superiore di ogni intervallo*/
+    double I=1./M;   /*ampiezza di ogni sottointervallo*/
+    vector<double> maxs(M, 0.); /*contiene l'estremo superiore di ogni intervallo*/
     for(int m=0; m<M; m++){
         maxs[m]=(m+1)*I;
     }
     
     for(int i=0; i<M; i++){
-        int counts[M]={0};  /*conteggio delle estrazioni contenute in ogni intervallo*/
+        vector<int> counts(M, 0.);  /*conteggio delle estrazioni contenute in ogni intervallo*/
+        
         for(int j=0; j<N; j++){
-            float r=Rarandom();
+            double r=rand.Rannyu();
             SearchInt(M, r, maxs, counts);    /*funzione che cerca il sottointervallo a cui appartiene il numero estratto e aggiorna il conteggio relativo*/
         }
-        float chi=ChiSqu(M, N, counts);  /*i-esimo chi quadro calcolato con una funzione apposita*/
+        
+        double chi=ChiSqu(M, N, counts);  /*i-esimo chi quadro calcolato con una funzione apposita*/
         chiout << chi << endl;  /*dato che poi plotterò*/
     }
 
     rand.SaveSeed();
 }
 
-void DataDistr(int M, int* Ns, ofstream& uniout, ofstream& eout, ofstream& lorout){
-    Random rand;   /*Inizializzazione del generatore di numeri casuali*/
+void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstream& lorout){
+    /*Inizializzazione del generatore di numeri casuali*/
+    Random rand;   
     InizRandom(rand);
 
     for(int i=0; i<M; i++){
-        float unifs[4]={0.};
-        float exps[4]={0.}; 
-        float lors[4]={0.};   
+        vector<double> unifs(4, 0.);
+        vector<double> exps(4, 0.); 
+        vector<double> lors(4, 0.);   
         for(int j=0; j<4; j++){
             int k=0;
             while(k<Ns[j]){
-                float r=Rarandom();
-                unifs[j]+=1+(5*r);   /*distribuzione uniforme fra 1 e 6*/
-                exps[j]+=-log(1-r);     /*distribuzione esponenziale con lambda=1*/
-                lors[j]+=tan(M_PI*(r-0.5));   /*distribuzione lorentziana con mu=0 e Gamma=1*/
+                unifs[j]+=rand.Rannyu(1., 6.);   /*distribuzione uniforme fra 1 e 6*/
+                exps[j]+=rand.Exp(1.);     /*distribuzione esponenziale con lambda=1*/
+                lors[j]+=rand.Lorentz(0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
                 k++;
             }
         }
         uniout << unifs[0] << " " << unifs[1] << " " << unifs[2] << " " << unifs[3] << " " << endl;
         eout << exps[0] << " " << exps[1] << " " << exps[2] << " " << exps[3] << " " << endl;
         lorout << lors[0] << " " << lors[1] << " " << lors[2] << " " << lors[3] << " " << endl;
+
     }
 
     rand.SaveSeed();    
 }
 
-void EndNeedle(float* starts, float t, int L, float* ends){
-    ends[0]=starts[0]+(L*cos(t));
+void EndNeedle(vector<double> &starts, double t, int L, vector<double> &ends){
+    if(t<=(M_PI/2)){
+        ends[0]=starts[0]+(L*cos(t));
+    }
+    else{
+        ends[0]=starts[0]-(L*cos(t));
+    }
     ends[1]=starts[1]+(L*sin(t));
 }
 
-bool TouchLine(float* starts, float* ends, float* maxs, int Nl){
+bool TouchLine(vector<double> &starts, vector<double> &ends, vector<double> &maxs, int Nl){
     /*suppongo linee parallele a x ergo guardo solo in che intervallo cadono la coordinata y di inizio e fine ago*/
     int s=BinSearchInt(0, Nl, starts[1], maxs, Nl);   /*indice che identifica in maxs il max dell'intervallo in cui cade la y della punta iniziale dell'ago*/
     int e=BinSearchInt(0, Nl, ends[1], maxs, Nl);   /*come s ma per la y della punta finale dell'ago*/
@@ -189,26 +171,26 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
 
 /*SE P/L NON é INTERO?*/
     int Nl=P/D;   /*numero di linee nel piano*/
-    float maxs[Nl]; /*contiene l'estremo superiore di ogni intervallo*/
+    vector<double> maxs(Nl, 0.); /*contiene l'estremo superiore di ogni intervallo*/
     for(int m=0; m<Nl; m++){
         maxs[m]=(m+1)*D;
     }
 
-    float sumb=0;   /*somma a blocchi della stima*/
-    float sum2b=0;  /*somma a blocchi della stima quadratica*/
-    float valueb; /*stima a blocchi*/
-    float value2b;    /*stima a blocchi al quadrato*/
+    vector<double> sumbs(2, 0.);   /*somma a blocchi della stima e del quadrato della stima*/
+    vector<double> valuebs(2, 0.); /*stima a blocchi e suo quadrato*/
     for(int j=0; j<B; j++){     /*ciclo sui blocchi*/
         int i=0;    /*numero di aghi validi e analizzati (i.e., cadono interamente del piano) per il j-simo blocco*/
         int Nbuf=0;    /*numero di aghi del j-simo blocco che intersecano una linea*/
+        
         while(i<T){     /*analisi del j-simo blocco*/
-            float starts[2];
-            starts[0]=P*Rarandom();   /*genero coordinata x della punta dell'ago, distribuita uniformemente nel piano*/
-            starts[1]=P*Rarandom();   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano*/
+            vector<double> starts(2, 0.);
+            starts[0]=rand.Rannyu(0., P);   /*genero coordinata x della punta dell'ago, distribuita uniformemente nel piano*/
+            starts[1]=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano*/
     /*DA CAMBIARE*/
-            float t=(M_PI/2)*Rarandom();    /*genero angolo theta fra asse x e ago, distribuito uniformemente fra 0 e pigreco mezzi*/
+            double t=rand.Rannyu(0., M_PI);   /*genero angolo theta fra asse x e ago, distribuito uniformemente fra 0 e pigreco mezzi*/
     /*DA CAMBIARE*/
-            float ends[2];
+            
+            vector<double> ends(2, 0.);
             EndNeedle(starts, t, L, ends);    /*calcola coordinate dell'altra punta dell'ago*/
             if(ends[0]<=P && ends[1]<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
                 i++;
@@ -217,12 +199,9 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
                 }
             }
         }
-        float value=(2*L*T)/(Nbuf*D);   /*stima del pigreco data dal solo j-simo blocco*/
-        sumb+=value;
-        sum2b+=(value)*(value);
-        valueb=sumb/(j+1);
-        value2b=sum2b/(j+1);
-        bout << valueb << " " << BlockError(valueb, value2b, j) << endl;
+        double value=(2*L*T)/(Nbuf*D);   /*stima del pigreco data dal solo j-simo blocco*/
+        BlockMean(value, sumbs, valuebs, j);
+        bout << valuebs[0] << " " << BlockError(valuebs, j) << endl;
     }
 
     rand.SaveSeed();   

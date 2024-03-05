@@ -30,7 +30,7 @@ int main (int argc, char *argv[]){
    cout << "Parte dedicata al chi quadro completata." << endl;
 
    /*Esercizio 1.2*/
-   int Ndists[4]={1, 2, 10, 100};    /*per ogni distribuzione calcolo somme Sn con questi valori di n*/
+   vector<int> Ndists={1, 2, 10, 100};    /*per ogni distribuzione calcolo somme Sn con questi valori di n*/
    int Mdist=10000;  /*numero di calcoli di Sn richiesti per ogni n, per ogni distribuzione*/
    ofstream uniout;  /*file di dati per la figura 1*/
    ofstream expout;  /*file di dati per la figura 2*/
