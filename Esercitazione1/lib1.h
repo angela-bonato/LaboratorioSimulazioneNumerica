@@ -18,5 +18,5 @@ void DataChiQuad(int, int, ofstream&);   /*calcolo dei dati usati per la statist
 void DataDistr(int, vector<int>&, ofstream&, ofstream&, ofstream&);    /*calcolo dei dati usati per l'esercizio 1.2*/
 
 void EndNeedle(vector<double>&, double, int, vector<double>&);   /*date le codinate del punto iniziale dell'ago e l'angolo di inclinazione e la lunghezza, restituisce le coordinate dell'estremo finale dell'ago*/
-bool TouchLine(vector<double>&, vector<double>&, vector<double>&, int);    /*true se l'ago interseca una linea*/
+bool TouchLine(double, double, vector<double>&, int);    /*true se l'ago interseca una linea*/
 void DataBuffon(int, int, int, int, int, ofstream&);    /*calcolo dei dati usati per l'esercizio 1.3*/

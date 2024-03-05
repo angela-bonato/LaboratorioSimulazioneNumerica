@@ -131,34 +131,34 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
     rand.SaveSeed();    
 }
 
-void EndNeedle(vector<double> &starts, double t, int L, vector<double> &ends){
-    if(t<=(M_PI/2)){
-        ends[0]=starts[0]+(L*cos(t));
+void EndNeedle(vector<double> &starts, double ct, int L, vector<double> &ends){
+    if(ct<=(M_PI/2)){
+        ends[0]=starts[0]+(L*ct);
     }
     else{
-        ends[0]=starts[0]-(L*cos(t));
+        ends[0]=starts[0]-(L*ct);
     }
-    ends[1]=starts[1]+(L*sin(t));
+    ends[1]=starts[1]+(L*sqrt(1-(ct)*(ct)));
 }
 
-bool TouchLine(vector<double> &starts, vector<double> &ends, vector<double> &maxs, int Nl){
+bool TouchLine(double start, double end, vector<double> &maxs, int Nl){
     /*suppongo linee parallele a x ergo guardo solo in che intervallo cadono la coordinata y di inizio e fine ago*/
-    int s=BinSearchInt(0, Nl, starts[1], maxs, Nl);   /*indice che identifica in maxs il max dell'intervallo in cui cade la y della punta iniziale dell'ago*/
-    int e=BinSearchInt(0, Nl, ends[1], maxs, Nl);   /*come s ma per la y della punta finale dell'ago*/
+    int s=BinSearchInt(0, Nl, start, maxs, Nl);   /*indice che identifica in maxs il max dell'intervallo in cui cade la y della punta iniziale dell'ago*/
+    int e=BinSearchInt(0, Nl, end, maxs, Nl);   /*come s ma per la y della punta finale dell'ago*/
     /*una parte dell'ago tocca una linea se le due punte giacciono in intervalli diversi oppure una delle punte tocca una linea*/
     if(s!=e){   
         return true;
     }
-    if(s-1>=0 && starts[1]==maxs[s-1]){
+    if(s-1>=0 && start==maxs[s-1]){
         return true;
     }
-    if(s==Nl && starts[1]==maxs[s]){
+    if(s==Nl && start==maxs[s]){
         return true;
     }
-    if(e-1>=0 && ends[1]==maxs[e-1]){
+    if(e-1>=0 && end==maxs[e-1]){
         return true;
     }
-    if(e==Nl && ends[1]==maxs[e]){
+    if(e==Nl && end==maxs[e]){
         return true;
     }
     return false;
@@ -169,7 +169,6 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
     Random rand;
     InizRandom(rand);
 
-/*SE P/L NON é INTERO?*/
     int Nl=P/D;   /*numero di linee nel piano*/
     vector<double> maxs(Nl, 0.); /*contiene l'estremo superiore di ogni intervallo*/
     for(int m=0; m<Nl; m++){
@@ -186,15 +185,13 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
             vector<double> starts(2, 0.);
             starts[0]=rand.Rannyu(0., P);   /*genero coordinata x della punta dell'ago, distribuita uniformemente nel piano*/
             starts[1]=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano*/
-    /*DA CAMBIARE*/
-            double t=rand.Rannyu(0., M_PI);   /*genero angolo theta fra asse x e ago, distribuito uniformemente fra 0 e pigreco mezzi*/
-    /*DA CAMBIARE*/
+            double ct=rand.Rannyu(-1, 1);   /*genero coseno dell'angolo theta fra asse x e ago, distribuito uniformemente fra -1 e 1*/
             
             vector<double> ends(2, 0.);
-            EndNeedle(starts, t, L, ends);    /*calcola coordinate dell'altra punta dell'ago*/
+            EndNeedle(starts, ct, L, ends);    /*calcola coordinate dell'altra punta dell'ago*/
             if(ends[0]<=P && ends[1]<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
                 i++;
-                if(TouchLine(starts, ends, maxs, Nl)){  /*OnLine()=true se l'ago tocca una linea*/
+                if(TouchLine(starts[1], ends[1], maxs, Nl)){  /*OnLine()=true se l'ago tocca una linea*/
                     Nbuf++;     /*conteggio aghi che toccano le linee*/
                 }
             }
