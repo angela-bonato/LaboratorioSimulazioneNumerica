@@ -44,13 +44,11 @@ int main (int argc, char *argv[]){
    lorout.close();
    cout << "Parte dedicata al teorema del limite centrale completata." << endl;
 
-
-/*DA SISTEMAREEE*/
    /*Esercizio 1.3*/
-   int Lbuf=1;   /*lunghezza dell'ago*/
-   int Dbuf=10;   /*distanza fra le linee del piano*/
-   int Pbuf=100;   /*massimo valore di x e y nel piano*/
-   int Mbuf=10000;   /*numero di tiri*/
+   double Lbuf=0.55;   /*lunghezza dell'ago*/
+   int Dbuf=1;   /*distanza fra le linee del piano*/
+   int Pbuf=2;   /*massimo valore di x e y nel piano*/
+   int Mbuf=100000;   /*numero di tiri*/
    int Bbuf=100;  /*numero blocchi*/
    int Tbuf=Mbuf/Bbuf;  /*numero di tiri per ogni blocco*/
    ofstream bufout;  /*file dati test di Buffon*/

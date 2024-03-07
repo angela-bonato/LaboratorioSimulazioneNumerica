@@ -44,6 +44,20 @@ double Random :: Lorentz(double mu, double gamma) {  /*distribuzione Cauchy-Lore
    return gamma*tan(M_PI*(r-0.5))+mu;
 }
 
+double Random :: arTheta() {  /*distribuzione di angolo theta uniformemente distribuito fra 0 e pi/2*/
+   int i=0;
+   double ret=0;
+   while(i==0){
+      double x=Rannyu(0, 1);
+      double y=Rannyu(0, 1);
+      if(((x*x)+(y*y))<1.){
+         i=2;
+         ret=1./(cos(x/sqrt((x*x)+(y*y))));
+      }
+   }
+   return ret;
+}
+
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
    double r=min+(max-min)*Rannyu();

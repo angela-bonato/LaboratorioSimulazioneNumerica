@@ -69,3 +69,6 @@ ipython_config.py
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,jupyternotebooks,visualstudiocode
+
+### Credo si possa ignorare anche questo
+.virtual_documents

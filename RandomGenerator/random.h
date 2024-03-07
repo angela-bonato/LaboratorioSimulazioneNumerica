@@ -28,6 +28,8 @@ public:
   double Exp(double lambda);
   //Metodo per generare distribuzione Cauchy-Lorentz
   double Lorentz(double mu, double gamma);
+  //Metodo per generare distribuzione un angolo fra 0 e pi/2 con metodo accept&reject
+  double arTheta();
 };
 
 #endif // __Random__

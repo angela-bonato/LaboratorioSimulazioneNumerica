@@ -4,10 +4,10 @@
 using namespace std;
 
 int BinSearchInt(int l, int r, double k, vector<double> &maxs, int M){
-    if(k<l || k>r){
-        cerr << "Errore: intervallo invalido esaminato da BinSearchInt." << endl;
-        return -1;
-    }
+   // if(k<maxs[l] || k>maxs[r]){
+     //   cerr << "Errore: intervallo invalido esaminato da BinSearchInt." << endl;
+       // return -1;
+    //}
     if(l==0 && 0.<=k && k<maxs[0]){  /*maxs[0] contiene il massimo del primo intervallo quindi se k sta nel primo intervallo serve un caso a parte*/
         return l;
     }
@@ -41,7 +41,7 @@ void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
     vector<double> sumbs(2, 0.);  /*alla i-esima iterazione, somma dei valori medi dei primi i blocchi e dei quadrati*/
     /*variabili usate per la figura 2 (grafico relativo alla varianza)*/
     vector<double> vavbs(2, 0.);   /*corrispettivo di avbs per la figura 2*/
-    vector<double> vsumbs(2, 0.);; /*corrispettivo di sumbs per la figura 2*/
+    vector<double> vsumbs(2, 0.); /*corrispettivo di sumbs per la figura 2*/
 
     for(int i=0; i<N; i++){    /*itero sui blocchi*/
         /*variabili per la figura 1*/
@@ -51,7 +51,7 @@ void DataAveVar(int N, int L, ofstream& aout, ofstream& vout){
         
         for(int j=0; j<L; j++){    /*ogni iterazione completa l'i-esimo blocco*/
             double r=rand.Rannyu();
-            if(r<0 || r>1){
+            if(r<0. || r>=1.){
                 cerr << "Errore: estrazione invalida in DataAveVar." << endl;
             }
             av+=r;
@@ -141,9 +141,6 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
                 unifs[j]+=rand.Rannyu(1., 6.);   /*distribuzione uniforme fra 1 e 6*/
                 exps[j]+=rand.Exp(1.);     /*distribuzione esponenziale con lambda=1*/
                 lors[j]+=rand.Lorentz(0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
-                if(unifs[j]<1 || unifs[j]>6 || exps[j]<0 ){
-                    cerr << "Errore: estrazione invalida in DataDistr." << endl;
-                }
                 k++;
             }
         }
@@ -165,18 +162,11 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
     rand.SaveSeed();    
 }
 
-void EndNeedle(vector<double> &starts, double ct, int L, vector<double> &ends){
-    if(ct<=(M_PI/2)){
-        ends[0]=starts[0]+(L*ct);
-    }
-    else{
-        ends[0]=starts[0]-(L*ct);
-    }
-    ends[1]=starts[1]+(L*sqrt(1-(ct)*(ct)));
+double EndNeedle(double start, double t, double L){
+    return start+(L*sin(t));
 }
 
 bool TouchLine(double start, double end, vector<double> &maxs, int Nl){
-    /*suppongo linee parallele a x ergo guardo solo in che intervallo cadono la coordinata y di inizio e fine ago*/
     int s=BinSearchInt(0, Nl, start, maxs, Nl);   /*indice che identifica in maxs il max dell'intervallo in cui cade la y della punta iniziale dell'ago*/
     int e=BinSearchInt(0, Nl, end, maxs, Nl);   /*come s ma per la y della punta finale dell'ago*/
     /*una parte dell'ago tocca una linea se le due punte giacciono in intervalli diversi oppure una delle punte tocca una linea*/
@@ -198,15 +188,12 @@ bool TouchLine(double start, double end, vector<double> &maxs, int Nl){
     return false;
 }
 
-void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
+void DataBuffon(double L, int D, int B, int T, int P, ofstream& bout){
     /*Inizializzazione del generatore di numeri casuali*/
     Random rand;
     InizRandom(rand);
 
     int Nl=P/D;   /*numero di linee nel piano*/
-    if(P%D!=0){
-        cout << "Attenzione: Nlinee=Pbuf/Dbuf è stato arrotondato." << endl;
-    }
 
     vector<double> maxs(Nl, 0.); /*contiene l'estremo superiore di ogni intervallo*/
     for(int m=0; m<Nl; m++){
@@ -220,19 +207,16 @@ void DataBuffon(int L, int D, int B, int T, int P, ofstream& bout){
         int Nbuf=0;    /*numero di aghi del j-simo blocco che intersecano una linea*/
         
         while(i<T){     /*analisi del j-simo blocco*/
-            vector<double> starts(2, 0.);
-            starts[0]=rand.Rannyu(0., P);   /*genero coordinata x della punta dell'ago, distribuita uniformemente nel piano*/
-            starts[1]=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano*/
-            double ct=rand.Rannyu(-1, 1);   /*genero coseno dell'angolo theta fra asse x e ago, distribuito uniformemente fra -1 e 1*/
-            if(starts[0]<0 || starts[0]>P || starts[1]<0 || starts[1]>P || ct<-1 || ct> 1){
-                cerr << "Errore: estrazione invalida in DataBuffon." << endl;
-            }
+            double start=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano, non mi interessa la x*/
+        //va rivisto    
+            double t=rand.arTheta();   /*genero l'angolo theta (fra 0 e pi/2) fra asse x e ago, usando accept&reject*/
+        //va rivisto 
 
-            vector<double> ends(2, 0.);
-            EndNeedle(starts, ct, L, ends);    /*calcola coordinate dell'altra punta dell'ago*/
-            if(ends[0]<=P && ends[1]<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
+            double end=EndNeedle(start, t, L);    /*calcola coordinata y dell'altra punta dell'ago*/
+            if(end<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
                 i++;
-                if(TouchLine(starts[1], ends[1], maxs, Nl)){  /*OnLine()=true se l'ago tocca una linea*/
+                //cout << start << " " << end << " " << TouchLine(start, end, maxs, Nl) << endl;
+                if(TouchLine(start, end, maxs, Nl)){  /*TouchLine()=true se l'ago tocca una linea*/
                     Nbuf++;     /*conteggio aghi che toccano le linee*/
                 }
             }
