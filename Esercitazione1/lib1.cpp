@@ -138,7 +138,7 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
         for(int j=0; j<4; j++){
             int k=0;
             while(k<Ns[j]){
-                unifs[j]+=rand.Rannyu(1., 6.);   /*distribuzione uniforme fra 1 e 6*/
+                unifs[j]+=rand.Rannyu(0., 1.);   /*distribuzione uniforme fra 0 e 1*/ 
                 exps[j]+=rand.Exp(1.);     /*distribuzione esponenziale con lambda=1*/
                 lors[j]+=rand.Lorentz(0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
                 k++;
@@ -208,9 +208,7 @@ void DataBuffon(double L, int D, int B, int T, int P, ofstream& bout){
         
         while(i<T){     /*analisi del j-simo blocco*/
             double start=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano, non mi interessa la x*/
-        //va rivisto    
-            double t=rand.arTheta();   /*genero l'angolo theta (fra 0 e pi/2) fra asse x e ago, usando accept&reject*/
-        //va rivisto 
+            double t=rand.arTheta(0., 1., 0., 1.);   /*genero l'angolo theta (fra 0 e pi/2) fra asse x e ago, usando accept&reject*/
 
             double end=EndNeedle(start, t, L);    /*calcola coordinata y dell'altra punta dell'ago*/
             if(end<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/

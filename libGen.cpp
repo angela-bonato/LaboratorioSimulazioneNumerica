@@ -49,3 +49,4 @@ double BlockError(vector<double> &vals, int B){
         return sqrt((vals[1]-(vals[0]*vals[0]))/B);   /*barra d'errore sul B-esimo blocco*/
     }
 }      
+
