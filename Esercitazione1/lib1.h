@@ -20,9 +20,15 @@ double ChiSqu(int M, int N, vector<int> &counts);
 //calcolo dei dati usati per la statistica sul chi quadro  
 void DataChiQuad(int M, int N, ofstream& chiout);
 
+//genera distribuzione esponenziale
+double RandomExp(Random& rand, double lambda);
+//genera distribuzione Cauchy-Lorentz
+double RandomLorentz(Random& rand, double mu, double gamma);
 //calcolo dei dati usati per l'esercizio 1.2
 void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstream& lorout);
 
+//genera distribuzione del seno un angolo in [0, pi/2] con metodo accept&reject
+double arTheta(Random& rand);
 //data la codinata y del punto iniziale dell'ago e il sin dell'angolo di inclinazione e la lunghezza, restituisce la coordinata y dell'estremo finale dell'ago
 double EndNeedle(double start, double t, double L);
 //true se l'ago interseca una linea

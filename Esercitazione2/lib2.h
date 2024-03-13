@@ -20,7 +20,9 @@ void DataInteg(int N, int L, ofstream& usout, ofstream& isout);
 int DirectionDice(Random& rand);
 //genero dove spostarmi (avanti, indietro = -1, +1)
 int StepDice(Random& rand);
+//genera uno spostamento per il rw continuo
+void SphericalDice(Random& rand, vector<float>& pos, float A);
 //calocola la distanza fra quel punto e l'origine
 double ComputeDist(vector<float> pos);
 //calcolo delle posizioni del random walker nel discreto
-void DataDRw(int N, int L, int S, float A, ofstream& drwout);
+void DataRw(int N, int L, int S, float A, ofstream& drwout, ofstream& crwout);

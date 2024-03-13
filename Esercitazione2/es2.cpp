@@ -21,17 +21,20 @@ int main (int argc, char *argv[]){
     cout << "Parte dedicata all'integrale completata." << endl;
 
     /*Esercizio 2.2*/
-    /*Calcolo dei dati utilizzati per la figure 1 (rw discreto)*/
+    /*Calcolo dei dati utilizzati per la figura 1 (rw discreto) e la figura 2 (rw continuo)*/
     int Mrw=10000;   /*numero totale di estrazioni*/
     int Nrw=100;  /*numero di blocchi*/
     int Lrw=Mrw/Nrw;  /*numero di ripetizioni per ogni blocco*/
     int Srw=100;    /*numero di passi che il walker deve effettuare*/
     float Arw=1;  /*larghezza del passo del reticolo discreto*/
     ofstream drwout; /*file su cui scriverò i dati per la figura 1*/
+    ofstream crwout; /*file su cui scriverò i dati per la figura 2*/
     drwout.open("descreterw.dat");
-    DataDRw(Nrw, Lrw, Srw, Arw, drwout);  /*racchiudo tutto il calcolo in una funzione apposita*/
+    crwout.open("continuumrw.dat");
+    DataRw(Nrw, Lrw, Srw, Arw, drwout, crwout);  /*racchiudo tutto il calcolo in una funzione apposita*/
     drwout.close();
-    cout << "Parte dedicata al random walk discreto completata." << endl;
+    crwout.close();
+    cout << "Parte dedicata al random walk completata." << endl;
 
     return 0;
 }

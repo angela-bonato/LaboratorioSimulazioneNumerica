@@ -95,31 +95,47 @@ int StepDice(Random& rand){
     return -2;
 }
 
+void SphericalDice(Random& rand, vector<float>& pos, float A){
+    double t=rand.Rannyu(0, M_PI);     /*angolo theta in [0, pi]*/
+    double f=rand.Rannyu(0, 2*M_PI);    /*angolo phi in [0, 2pi]*/
+    /*aggiorno pos convertendo in cartesiane*/
+    pos[0]+=A*sin(t)*cos(f);
+    pos[1]+=A*sin(t)*sin(f);
+    pos[2]+=A*cos(t);
+}
+
 double ComputeDist(vector<float> pos){
     return (pos[0]*pos[0])+(pos[1]*pos[1])+(pos[2]*pos[2]);     /*modulo quadro del vettore da (0,0,0) a pos*/
 }
 
-void DataDRw(int N, int L, int S, float A, ofstream& drwout){
+void DataRw(int N, int L, int S, float A, ofstream& drwout, ofstream& crwout){
     /*Inizializzazione del generatore di numeri casuali*/
     Random rand;
     InizRandom(rand);
 
-    vector<double> dsumbs(S, 0.);  /*alla i-esima iterazione, somma dei cammini medi dei primi i blocchi*/
+    vector<double> dsumbs(S, 0.);  /*alla i-esima iterazione, somma dei cammini medi dei primi i blocchi per il rw discreto*/
+    vector<double> csumbs(S, 0);    /*corrispettivo per il rw continuo*/
 
     for(int i=0; i<N; i++){     /*ciclo sui blocchi*/
-        vector<double> meanwalks(S, 0.);     /*vettore con la media del cammino medio ad ogni passo per l'i-esimo blocco*/
+        vector<double> dmeans(S, 0.);     /*vettore con la media del cammino medio ad ogni passo per l'i-esimo blocco per il rw discreto*/
+        vector<double> cmeans(S, 0.);   /*corrispettivo per il rw continuo*/
 
         for(int j=0; j<L; j++){     /*ripetizioni nel blocco i-esimo*/
-            vector<float> pos(3, 0.);     /*vettore di coordinate della posizione del walker, inizializzato a 0 perchè parte dall'origine*/
-            for(int n=0; n<S; n++){     /*passi nella j-sima ripetizione dell'i-esimo blocco*/
-                pos[DirectionDice(rand)]+=A*StepDice(rand);
-                meanwalks[n]+=ComputeDist(pos);     /*aggiorno la somma al numeratore del cammino medio al n-simo passo*/
-            }
+            vector<float> dpos(3, 0.);     /*vettore di coordinate della posizione del walker nel discreto, inizializzato a 0 perchè parte dall'origine*/
+            vector<float> cpos(3, 0.);     /*coordinate posizione rw continuo*/
             
+            for(int n=0; n<S; n++){     /*passi nella j-sima ripetizione dell'i-esimo blocco*/
+                dpos[DirectionDice(rand)]+=A*StepDice(rand);
+                dmeans[n]+=ComputeDist(dpos);     /*aggiorno la somma al numeratore del cammino medio al n-simo passo*/
+
+                SphericalDice(rand, cpos, A);    /*estraggo la posizione del rw continuo*/
+                cmeans[n]+=ComputeDist(cpos);   /*aggiorno la somma*/
+            }
         }
 
         for(int n=0; n<S; n++){
-            dsumbs[n]+=meanwalks[n]/L;  /*somma dei cammini medi al passo n dopo L iterazioni all'i-esimo blocco*/
+            dsumbs[n]+=dmeans[n]/L;  /*somma dei cammini medi al passo n dopo L iterazioni all'i-esimo blocco*/
+            csumbs[n]+=cmeans[n]/L;
         }
     }
 
@@ -129,6 +145,13 @@ void DataDRw(int N, int L, int S, float A, ofstream& drwout){
         }
     }
     else cerr << "Errore: impossibile aprire descreterw.dat" << endl;
+
+    if(crwout.is_open()){
+        for(int e=0; e<S; e++){
+            crwout << sqrt(csumbs[e]/N) << endl;  /*stampo media a blocchi dopo l'ultimo blocco per ogni passo*/
+        }
+    }
+    else cerr << "Errore: impossibile aprire continuumrw.dat" << endl;
 
     rand.SaveSeed();
 }

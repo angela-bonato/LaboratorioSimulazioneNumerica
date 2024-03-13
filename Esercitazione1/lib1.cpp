@@ -126,6 +126,19 @@ void DataChiQuad(int M, int N, ofstream& chiout){
     rand.SaveSeed();
 }
 
+double RandomExp(Random& rand, double lambda) {  /*distribuzione esponenziale*/
+    double e=-(1/lambda)*log(1.-rand.Rannyu());
+    if(e<0){
+        cerr << "Errore: estrazione invalida di rand.Exp()." << endl;
+    }
+    return e;
+}
+
+double RandomLorentz(Random& rand, double mu, double gamma) {  /*distribuzione Cauchy-Lorentz*/
+    double r=rand.Rannyu();
+    return gamma*tan(M_PI*(r-0.5))+mu;
+}
+
 void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstream& lorout){
     /*Inizializzazione del generatore di numeri casuali*/
     Random rand;   
@@ -139,8 +152,8 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
             int k=0;
             while(k<Ns[j]){
                 unifs[j]+=rand.Rannyu(0., 1.);   /*distribuzione uniforme fra 0 e 1*/ 
-                exps[j]+=rand.Exp(1.);     /*distribuzione esponenziale con lambda=1*/
-                lors[j]+=rand.Lorentz(0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
+                exps[j]+=RandomExp(rand, 1.);     /*distribuzione esponenziale con lambda=1*/
+                lors[j]+=RandomLorentz(rand, 0., 1.);   /*distribuzione lorentziana con mu=0 e Gamma=1*/
                 k++;
             }
         }
@@ -160,6 +173,21 @@ void DataDistr(int M, vector<int> &Ns, ofstream& uniout, ofstream& eout, ofstrea
     }
 
     rand.SaveSeed();    
+}
+
+
+double arTheta(Random& rand) {  /*distribuzione di un angolo theta in [-pi/2, pi/2]*/
+    int i=0;
+    double ret=0;
+    while(i==0){
+        double x=rand.Rannyu(0., 1.);
+        double y=rand.Rannyu(-1., 1.);
+        if(((x*x)+(y*y))<1){
+            i=2;
+            ret=1./cos((sqrt((x*x)+(y*y))));         
+        }
+    }
+    return ret;
 }
 
 double EndNeedle(double start, double t, double L){
@@ -208,12 +236,11 @@ void DataBuffon(double L, int D, int B, int T, int P, ofstream& bout){
         
         while(i<T){     /*analisi del j-simo blocco*/
             double start=rand.Rannyu(0., P);   /*genero coordinata y della punta dell'ago, distribuita uniformemente nel piano, non mi interessa la x*/
-            double t=rand.arTheta(0., 1., 0., 1.);   /*genero l'angolo theta (fra 0 e pi/2) fra asse x e ago, usando accept&reject*/
+            double t=arTheta(rand);   /*genero l'angolo theta in [-pi/2, pi/2] fra asse x e ago, usando accept&reject*/
 
             double end=EndNeedle(start, t, L);    /*calcola coordinata y dell'altra punta dell'ago*/
             if(end<=P){   /*rigetto punti tc la fine dell'ago esce dal piano*/
                 i++;
-                //cout << start << " " << end << " " << TouchLine(start, end, maxs, Nl) << endl;
                 if(TouchLine(start, end, maxs, Nl)){  /*TouchLine()=true se l'ago tocca una linea*/
                     Nbuf++;     /*conteggio aghi che toccano le linee*/
                 }

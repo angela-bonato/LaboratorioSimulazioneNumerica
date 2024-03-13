@@ -1,3 +1,13 @@
+/****************************************************************
+*****************************************************************
+    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
+   _/_/  _/ _/       _/       Physics Department
+  _/  _/_/    _/    _/       Universita' degli Studi di Milano
+ _/    _/       _/ _/       Prof. D.E. Galli
+_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
+*****************************************************************
+*****************************************************************/
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -31,63 +41,30 @@ double Random :: Gauss(double mean, double sigma) {
    return mean + x * sigma;
 }
 
-double Random :: Exp(double lambda) {  /*distribuzione esponenziale*/
-   double e=-(1/lambda)*log(1.-Rannyu());
-   if(e<0){
-      cerr << "Errore: estrazione invalida di rand.Exp()." << endl;
-   }
-   return e;
-}
-
-double Random :: Lorentz(double mu, double gamma) {  /*distribuzione Cauchy-Lorentz*/
-   double r=Rannyu();
-   return gamma*tan(M_PI*(r-0.5))+mu;
-}
-
-double Random :: arTheta(double xmin, double xmax, double ymin, double ymax) {  /*distribuzione di angolo theta uniformemente distribuito*/
-   int i=0;
-   double ret=0;
-   while(i==0){
-      double x=Rannyu(xmin, xmax);
-      double y=Rannyu(ymin, ymax);
-      if(((x*x)+(y*y))<1.){
-         i=2;
-         ret=1./(cos(x/sqrt((x*x)+(y*y))));
-      }
-   }
-   return ret;
-}
-
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
-   double r=min+(max-min)*Rannyu();
-   if(r<min || r>max){
-      cerr << "Errore: estrazione invalida di Rannyu(min, max)." << endl;
-   }
-   return r;
+   return min+(max-min)*Rannyu();
 }
 
 double Random :: Rannyu(void){
-   // This function generates a random number in the range [0,1)
-   const double twom12=0.000244140625;
-   int i1,i2,i3,i4;
-   double r;
+  // This function generates a random number in the range [0,1)
+  const double twom12=0.000244140625;
+  int i1,i2,i3,i4;
+  double r;
 
-   i1 = l1*m4 + l2*m3 + l3*m2 + l4*m1 + n1;
-   i2 = l2*m4 + l3*m3 + l4*m2 + n2;
-   i3 = l3*m4 + l4*m3 + n3;
-   i4 = l4*m4 + n4;
-   l4 = i4%4096;
-   i3 = i3 + i4/4096;
-   l3 = i3%4096;
-   i2 = i2 + i3/4096;
-   l2 = i2%4096;
-   l1 = (i1 + i2/4096)%4096;
-   r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
-   if(r<0 || r>1){
-      cerr << "Errore: estrazione invalida di Rannyu()." << endl;
-   }
-   return r;
+  i1 = l1*m4 + l2*m3 + l3*m2 + l4*m1 + n1;
+  i2 = l2*m4 + l3*m3 + l4*m2 + n2;
+  i3 = l3*m4 + l4*m3 + n3;
+  i4 = l4*m4 + n4;
+  l4 = i4%4096;
+  i3 = i3 + i4/4096;
+  l3 = i3%4096;
+  i2 = i2 + i3/4096;
+  l2 = i2%4096;
+  l1 = (i1 + i2/4096)%4096;
+  r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
+
+  return r;
 }
 
 void Random :: SetRandom(int * s, int p1, int p2){
@@ -107,3 +84,13 @@ void Random :: SetRandom(int * s, int p1, int p2){
 
   return;
 }
+
+/****************************************************************
+*****************************************************************
+    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
+   _/_/  _/ _/       _/       Physics Department
+  _/  _/_/    _/    _/       Universita' degli Studi di Milano
+ _/    _/       _/ _/       Prof. D.E. Galli
+_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
+*****************************************************************
+*****************************************************************/
