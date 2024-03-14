@@ -1,5 +1,4 @@
 #include "lib2.h"
-#include "../libGen.h"
 
 using namespace std;
 
@@ -132,26 +131,25 @@ void DataRw(int N, int L, int S, float A, ofstream& drwout, ofstream& crwout){
                 cmeans[n]+=ComputeDist(cpos);   /*aggiorno la somma*/
             }
         }
-
         for(int n=0; n<S; n++){
             dsumbs[n]+=dmeans[n]/L;  /*somma dei cammini medi al passo n dopo L iterazioni all'i-esimo blocco*/
             csumbs[n]+=cmeans[n]/L;
         }
     }
 
-    if(drwout.is_open()){
-        for(int e=0; e<S; e++){
-            drwout << sqrt(dsumbs[e]/N) << endl;  /*stampo media a blocchi dopo l'ultimo blocco per ogni passo*/
-        }
-    }
-    else cerr << "Errore: impossibile aprire descreterw.dat" << endl;
 
-    if(crwout.is_open()){
-        for(int e=0; e<S; e++){
-            crwout << sqrt(csumbs[e]/N) << endl;  /*stampo media a blocchi dopo l'ultimo blocco per ogni passo*/
-        }
-    }
-    else cerr << "Errore: impossibile aprire continuumrw.dat" << endl;
+    if(drwout.is_open() && crwout.is_open()){
+            for(int n=0; n<S; n++){
+                vector<double> dvalues={sqrt(dsumbs[n]/N), sqrt(dsumbs[n]/N)*sqrt(dsumbs[n]/N)};    /*calcolo il valore finale*/
+                vector<double> cvalues={sqrt(csumbs[n]/N), sqrt(csumbs[n]/N)*sqrt(csumbs[n]/N)};
 
+                drwout << dvalues[0] << " " << BlockError(dvalues, N) << endl;  /*stampo media a blocchi dopo l'ultimo blocco per ogni passo*/
+                crwout << cvalues[0] << " " << BlockError(cvalues, N) << endl;  /*stampo media a blocchi dopo l'ultimo blocco per ogni passo*/
+            }
+        }
+
+//vanno rivisti gli errori
+
+        else cerr << "Errore: impossibile aprire i files di output" << endl;
     rand.SaveSeed();
 }
