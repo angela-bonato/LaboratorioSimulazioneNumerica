@@ -3,75 +3,76 @@
 
 ### C++ ###
 # Prerequisites
-*.d
+**/*.d
 
 # Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+**/*.slo
+**/*.lo
+**/*.o
+**/*.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+**/*.gch
+**/*.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+**/*.so
+**/*.dylib
+**/*.dll
 
 # Fortran module files
-*.mod
-*.smod
+**/*.mod
+**/*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+**/*.lai
+**/*.la
+**/*.a
+**/*.lib
 
 # Executables
-*.exe
-*.out
-*.app
+**/*.exe
+**/*.out
+**/*.app
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
+**/.ipynb_checkpoints
+**/*/.ipynb_checkpoints/*
 
 # IPython
-profile_default/
-ipython_config.py
+**/profile_default/
+**/ipython_config.py
 
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
 
 ### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+**/.vscode/*
+**/!.vscode/settings.json
+**/!.vscode/tasks.json
+**/!.vscode/launch.json
+**/!.vscode/extensions.json
+**/!.vscode/*.code-snippets
 
 # Local History for Visual Studio Code
-.history/
+**/.history/
 
 # Built Visual Studio Code Extensions
-*.vsix
+**/*.vsix
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
-.history
-.ionide
+**/.history
+**/.ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,jupyternotebooks,visualstudiocode
 
 ### Credo si possa ignorare anche questo
-.virtual_documents
+**/.virtual_documents
 
 ###Tolgo generatore meccanica statistica perchè quello in questa cartella è solo un backup
-NSL_SIMULATOR/
+**/NSL_SIMULATOR/
+**/OUTPUT
