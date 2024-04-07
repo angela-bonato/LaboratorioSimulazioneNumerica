@@ -601,10 +601,10 @@ void System :: averages(int blk){
     average  = _average(_index_penergy);
     sum_average = _global_av(_index_penergy);
     sum_ave2 = _global_av2(_index_penergy);
-    coutf << setw(12) << blk 
-          << setw(12) << average
-          << setw(12) << sum_average/double(blk)
-          << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+    coutf << setw(18) << blk 
+          << setw(18) << scientific << average
+          << setw(18) << scientific << sum_average/double(blk)
+          << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
     coutf.close();
   }
   // KINETIC ENERGY ////////////////////////////////////////////////////////////
@@ -613,10 +613,10 @@ void System :: averages(int blk){
     average  = _average(_index_kenergy);
     sum_average = _global_av(_index_kenergy);
     sum_ave2 = _global_av2(_index_kenergy);
-    coutf << setw(12) << blk
-          << setw(12) << average
-          << setw(12) << sum_average/double(blk)
-          << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+    coutf << setw(18) << blk
+          << setw(18) << scientific << average
+          << setw(18) << scientific << sum_average/double(blk)
+          << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
     coutf.close();
   }
   // TOTAL ENERGY //////////////////////////////////////////////////////////////
@@ -625,10 +625,10 @@ void System :: averages(int blk){
     average  = _average(_index_tenergy);
     sum_average = _global_av(_index_tenergy);
     sum_ave2 = _global_av2(_index_tenergy);
-    coutf << setw(12) << blk
-          << setw(12) << average
-          << setw(12) << sum_average/double(blk)
-          << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+    coutf << setw(18) << blk
+          << setw(18) << scientific << average
+          << setw(18) << scientific << sum_average/double(blk)
+          << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
     coutf.close();
   }
   // TEMPERATURE ///////////////////////////////////////////////////////////////
@@ -637,10 +637,10 @@ void System :: averages(int blk){
     average  = _average(_index_temp);
     sum_average = _global_av(_index_temp);
     sum_ave2 = _global_av2(_index_temp);
-    coutf << setw(12) << blk
-          << setw(12) << average
-          << setw(12) << sum_average/double(blk)
-          << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+    coutf << setw(18) << blk
+          << setw(18) << scientific << average
+          << setw(18) << scientific << sum_average/double(blk)
+          << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
     coutf.close();
   }
   // PRESSURE //////////////////////////////////////////////////////////////////
@@ -649,10 +649,10 @@ void System :: averages(int blk){
     average  = _average(_index_pressure);
     sum_average = _global_av(_index_pressure);
     sum_ave2 = _global_av2(_index_pressure);
-    coutf << setw(12) << blk
-          << setw(12) << average
-          << setw(12) << sum_average/double(blk)
-          << setw(12) << this->error(sum_average, sum_ave2, blk) << endl;
+    coutf << setw(18) << blk
+          << setw(18) << scientific << average
+          << setw(18) << scientific << sum_average/double(blk)
+          << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
     coutf.close();
   }
   // GOFR //////////////////////////////////////////////////////////////////////
