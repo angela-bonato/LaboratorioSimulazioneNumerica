@@ -26,8 +26,8 @@ void Acceptance(Random& rand, Acc& a, double prec, double pres);
 //genera un punto in R^3 secondo Metropolis prendendo in ingresso il punto precedente, una flag che indica la probabilità target, una flag che indica la probabilità secodno cui accetto gli step, un parametro per la distribuzione step, un double che tiene in memoria TargetDistribution calcolata al punto precedente
 vector<double> MetropolisStep(Random& rand, vector<double> prec, int p, int t, Acc& d, double delta, double& tarprec);
 
-//fa un po' di passi del metropolis e valuta l'accettazione media, utile a capire se la delta impostata è corretta
-void CheckMeanAcceptance(vector<double> start, int p, int t, double delta);
+//fa un po' di passi del metropolis e valuta l'accettazione e il raggio, utile a capire se la delta impostata è corretta e a dare il punto di partenza per l'analisi
+vector<double> Equilibration(vector<double> start, int p, int t, int A, double delta, ofstream& eqout, ofstream& epout);
 //stampa le posizioni su file
 void PrintPosition(vector<double> pos, ofstream& out);
 //fa effettivamente l'analisi dati

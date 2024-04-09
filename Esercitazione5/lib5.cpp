@@ -35,8 +35,7 @@ double TargetDistribution(vector<double> pos, int p){
         return psi*psi;
     }
     if(p==2){
-        double ct=pos[0]/sqrt((pos[0]*pos[0])+(pos[1]*pos[1]));     /*da coordinate cartesiane ricavo il coseno di theta*/
-        double psi=abs((1./8.)*sqrt(2./M_PI)*r*exp(-r/2.)*ct);
+        double psi=abs((1./8.)*sqrt(2./M_PI)*exp(-r/2.)*pos[2]);
         return psi*psi;
     }
 }
@@ -66,34 +65,40 @@ vector<double> MetropolisStep(Random& rand, vector<double> prec, int p, int t, A
     }
 }
 
-void CheckMeanAcceptance(vector<double> start, int p, int t, double delta){
+vector<double> Equilibration(vector<double> start, int p, int t, int A, double delta, ofstream& eqout, ofstream& epout){
     Random rand;
     InizRandom(rand);    /*inizializzo il generatore*/
 
-    double tarprec=TargetDistribution(start, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
     vector<double> prec(3, 0.);    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
-    prec[0]=start[0];
+    prec=start;
+    double tarprec=TargetDistribution(prec, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
 
     vector<double> pres(3, 0.);     /*qua di volta in volta genero il passo presente*/
 
-    int A=10000;    /*step su cui medio*/
     double meanacc=0;   /*media accettazione*/ 
 
     for(int i=0; i<A; i++){     /*ciclo piccolo tanto è solo per vedere il valor medio di accettazione*/
         Acc a;
         pres=MetropolisStep(rand, prec, p, t, a, delta, tarprec);  /*genero un punto in R^3 secondo la distribuzione target*/
+
+        eqout << EvaluateRadius(pres) << setw(18) << a.alpha << endl;
+        PrintPosition(pres, epout);
+
         meanacc+=a.alpha;
+        prec=pres;  /*aggiorno il passo*/
     }
 
     cout << "Dopo " << A << " passi con delta=" << delta << " si ha <alpha>=" << meanacc/A << endl;
 
     rand.SaveSeed();
+
+    return prec;    /*punto finale che è inizio dell'analisi dati*/
 }
 
 void PrintPosition(vector<double> pos, ofstream& out){
-    out << setw(18) << scientific << pos[0] 
-        << setw(18) << scientific << pos[1]
-        << setw(18) << scientific << pos[3] << endl;
+    out << setw(18) << pos[0] 
+        << setw(18) << pos[1]
+        << setw(18) << pos[2] << endl;
 }
 
 void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta, ofstream& u1pout, ofstream& u1rout){
@@ -103,9 +108,9 @@ void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta
     vector<double> valuebs(2, 0.);  /*valor medio a blocchi e suo quadrato*/
     vector<double> sumbs(2, 0.);  /*somma a blocchi e suo quadrato*/
 
-    double tarprec=TargetDistribution(start, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
     vector<double> prec(3, 0.);    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
-    prec[0]=start[0];
+    prec=start;
+    double tarprec=TargetDistribution(prec, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
 
     vector<double> pres(3, 0.);     /*qua di volta in volta genero il passo presente*/
 
@@ -117,7 +122,9 @@ void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta
             if(u1pout.is_open()){
                 PrintPosition(pres, u1pout);
             }
-            else cerr << "Errore: impossibile aprire unif1pos.dat" << endl;
+            else cerr << "Errore: impossibile aprire il file di output delle posizioni" << endl;
+
+            prec=pres;  /*aggiorno il passo*/
 
             sumr+=EvaluateRadius(pres);  /*calcolo il valore r corrispondente aggiornando la somma del blocco*/
         }
@@ -128,7 +135,7 @@ void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta
             u1rout << setw(18) << scientific << valuebs[0] 
                 << setw(18) << scientific << BlockError(valuebs, i) << endl;    /*variabili da plottare*/
         }
-        else cerr << "Errore: impossibile aprire unif1rad.dat" << endl;
+        else cerr << "Errore: impossibile aprire il file di output dei raggi medi" << endl;
 
     }
 
