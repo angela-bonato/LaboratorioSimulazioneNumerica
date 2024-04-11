@@ -15,7 +15,7 @@ struct Acc{
     double alpha;
 };
 
-//genera lo step successivo al punto dato, riceve in ingresso anche una flag che gli dice quale probabilità usare (se uniforme=0 o gaussiana=3) e la larghezza di questa probabilità
+//genera lo step successivo al punto dato, riceve in ingresso anche una flag che gli dice quale probabilità di transizione usare (se uniforme=0 o gaussiana=3) e la larghezza di questa probabilità
 vector<double> GenerateStep(Random& rand, vector<double> pos, int t, double delta);
 //data una posizione cartesiana calcola il raggio delle coordinate sferiche
 double EvaluateRadius(vector<double> pos);

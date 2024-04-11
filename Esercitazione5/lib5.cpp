@@ -119,11 +119,13 @@ void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta
         for(int j=0; j<L; j++){     /*ciclo che svolge il blocco*/
             Acc a;
             pres=MetropolisStep(rand, prec, p, t, a, delta, tarprec);  /*genero un punto in R^3 secondo la distribuzione target*/
-            if(u1pout.is_open()){
-                PrintPosition(pres, u1pout);
+            if((i%50)==0){  /*stampo una posizione ogni tot altrimenti mi viene un file pesantissimo*/
+                if(u1pout.is_open()){
+                    PrintPosition(pres, u1pout);
+                }    
+                else cerr << "Errore: impossibile aprire il file di output delle posizioni" << endl;    
             }
-            else cerr << "Errore: impossibile aprire il file di output delle posizioni" << endl;
-
+            
             prec=pres;  /*aggiorno il passo*/
 
             sumr+=EvaluateRadius(pres);  /*calcolo il valore r corrispondente aggiornando la somma del blocco*/

@@ -9,9 +9,9 @@ int main (int argc, char *argv[]){
     int M=1000000;   /*numero totale di passi*/
     int N=100;  /*numero di blocchi*/
     int L=M/N;  /*numero di passi per ogni blocco*/
-    int A=10000;    /*numero passi per l'equilibrazione*/
+    int A=5000;    /*numero passi per l'equilibrazione*/
     int p;    /*flag per settare la distribuzione target (1=psi100, 2=psi2100)*/
-    int t;    /*flag per settare la distribuzione per gli step (0=uniforme, 3=gaussiana)*/
+    int t;    /*flag per settare la probabilità di transizione per gli step (0=uniforme, 3=gaussiana)*/
     vector<double> start(3, 0.);    /*punto di parteza del sampling*/
     double delta;   /*parametro che regola la larghezza di ogni passo, settato tc l'accettazione media sia circa 0.5*/
 
