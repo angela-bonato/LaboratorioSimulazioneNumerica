@@ -1,34 +1,31 @@
 #include <iostream>
 #include "SOURCE/system.h"
+#include "lib6.h"
 
 using namespace std;
 
+/*Codice modificato in modo che, a SIMULATION TYPE J H fissati, vengano analizzate e simulate tutte le grandezze richieste.
+Per fare ciò, ho definito nuovi metodi e anche modificato il modo in cui average stampa su files i risultati dell'analisi.*/
+
 int main (int argc, char *argv[]){
 
-    int Nconf = 1;
     System syst;
-    syst.initialize();
-    syst.initialize_properties();
+    syst.initialize();  /*nel file di input metto prima temperatura da guardare (la più alta)*/
     syst.block_reset(0);
 
-    // Equilibrazione non necessaria ogni volta
-    /*ofstream eqenpout; 
-    eqenpout.open("OUTPUT/eqtenergy.dat");*/ 
+    bool p=false;   /*flag che se==true fa sì che si salvino i dati necessari a fare il plot della fase di equilibrazione*/
 
-    for(int i=0; i < syst.get_nbl(); i++){ //loop over blocks
-        for(int j=0; j < syst.get_nsteps(); j++){ //loop over steps in a block
-            syst.step();
-            syst.measure();
+    while(syst.get_Temp()>=0.5){    /*ciclo sulle temperature da simulare che vanno da 2 a 0.5 a passo 0.15*/
 
-            //eqenpout << scientific << syst.get_EnMeasure() << endl;
+        Equilibration(syst, p);    /*ciclo di equilibrazione, eventualmente con raccolta dati per plot*/
+        cout << "Equilibrazione per T=" << syst.get_Temp() << " conclusa." << endl;
 
-            if(j%10 == 0){
-            Nconf++;
-            }
-        }
-        syst.averages(i+1);
-        syst.block_reset(i+1);
+        Analysis(syst);     /*ciclo di analisi*/
+        cout << "Analisi per T=" << syst.get_Temp() << " conclusa." << endl;
+
+        syst.set_Temp(syst.get_Temp() - 0.15);   /*aumento di un passo la temperatura del sistema e ripeto tutto*/
     }
+
     syst.finalize();
 
     return 0;

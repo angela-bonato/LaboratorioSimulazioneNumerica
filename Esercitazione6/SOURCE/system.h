@@ -86,8 +86,19 @@ public: // Function declarations
   double Force(int i, int dim); // Calculate force on a particle along a dimension
   double Boltzmann(int i, bool xnew); // Calculate Boltzmann factor for Metropolis acceptance
 
-  //Aggiungo metodo che restituisce misura di energia totale passo passo
+  //Metodi aggiunti per gestire meglio le simulazioni
+  //Restituisce misura di energia totale passo passo
   double get_EnMeasure();
+  //Setta il numero di passi da fare (i.e., risetto numero blocchi e numero passi per blocco)
+  void set_SymDuration(int Nblocks, int Nsteps);
+  //Setta temperatura sistema
+  void set_Temp(double T);
+  //Restituisce temperatura sistema
+  double get_Temp();
+  //Per equilibrazione misuro solo energia tot, inutile mettere già tutto
+  void set_EqProperties();
+  //Fa un passo di algoritmo di Gibbs, prende lo spin pre passo (input è indice che identifica particella in esame) e decide il valore dello spin finale (cioè se flippare o no)
+  void gibbs(int i);
 
 };
 

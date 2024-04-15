@@ -66,7 +66,7 @@ double System :: Force(int i, int dim){
 
 void System :: move(int i){ // Propose a MC move for particle i
   if(_sim_type == 3){ //Gibbs sampler for Ising
-    // TO BE FIXED IN EXERCISE 6
+    gibbs(i); /*faccio tutto qua dentro*/
   } else {           // M(RT)^2
     if(_sim_type == 1){       // LJ system
       vec shift(_ndim);       // Will store the proposed translation
@@ -97,6 +97,14 @@ bool System :: metro(int i){ // Metropolis algorithm
   acceptance = exp(-_beta*delta_E);
   if(_rnd.Rannyu() < acceptance ) decision = true; //Metropolis acceptance step
   return decision;
+}
+
+void System :: gibbs(int i){
+  double delta_E, acceptance;
+  delta_E = 2.0 * _particle(i).getspin() * 
+            ( _J * (_particle(this->pbc(i-1)).getspin() + _particle(this->pbc(i+1)).getspin() ) + _H );
+  acceptance = 1./ (1+exp(-_beta*delta_E)); /*probabilità che lo spin della particella non venga flippato va da 0 a acceptance*/
+  if(_rnd.Rannyu() > acceptance ) _particle(i).flip(); /*se rnd è maggiore di acceptance sono nel segmento da acceptance a 1 ergo flippo, altrimenti no*/
 }
 
 double System :: Boltzmann(int i, bool xnew){
@@ -312,9 +320,9 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _index_kenergy = index_property;
         index_property++;
       } else if( property == "TOTAL_ENERGY" ){
-        ofstream coutt("OUTPUT/total_energy.dat");
+        /*ofstream coutt("OUTPUT/total_energy.dat");
         coutt << "#     BLOCK:   ACTUAL_TE:    TE_AVE:      ERROR:" << endl;
-        coutt.close();
+        coutt.close();*/
         _nprop++;
         _measure_tenergy = true;
         _index_tenergy = index_property;
@@ -347,25 +355,25 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _index_gofr = index_property;
         index_property+= _n_bins;
       } else if( property == "MAGNETIZATION" ){
-        ofstream coutpr("OUTPUT/magnetization.dat");
+        /*ofstream coutpr("OUTPUT/magnetization.dat");
         coutpr << "#     BLOCK:   ACTUAL_M:     M_AVE:       ERROR:" << endl;
-        coutpr.close();
+        coutpr.close();*/
         _nprop++;
         _measure_magnet = true;
         _index_magnet = index_property;
         index_property++;
       } else if( property == "SPECIFIC_HEAT" ){
-        ofstream coutpr("OUTPUT/specific_heat.dat");
+        /*ofstream coutpr("OUTPUT/specific_heat.dat");
         coutpr << "#     BLOCK:   ACTUAL_CV:    CV_AVE:      ERROR:" << endl;
-        coutpr.close();
+        coutpr.close();*/
         _nprop++;
         _measure_cv = true;
         _index_cv = index_property;
         index_property++;
       } else if( property == "SUSCEPTIBILITY" ){
-        ofstream coutpr("OUTPUT/susceptibility.dat");
+        /*ofstream coutpr("OUTPUT/susceptibility.dat");
         coutpr << "#     BLOCK:   ACTUAL_X:     X_AVE:       ERROR:" << endl;
-        coutpr.close();
+        coutpr.close();*/
         _nprop++;
         _measure_chi = true;
         _index_chi = index_property;
@@ -575,7 +583,6 @@ void System :: measure(){ // Measure properties
     for(int i=0; i<_npart; i++){
       magnetization+=double(_particle(i).getspin());
     }
-    magnetization/=_npart;
     _measurement(_index_magnet) = magnetization;
   }
   // SPECIFIC HEAT /////////////////////////////////////////////////////////////
@@ -584,16 +591,12 @@ void System :: measure(){ // Measure properties
   }
   // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
   if (_measure_chi){
-    _measurement(_index_chi) = _beta * ((magnetization * _npart) * (magnetization * _npart));
+    _measurement(_index_chi) = magnetization * magnetization;
   }
 
   _block_av += _measurement; //Update block accumulators
 
   return;
-}
-
-double System :: get_EnMeasure(){
-  return _measurement(_index_tenergy);
 }
 
 void System :: averages(int blk){
@@ -603,9 +606,12 @@ void System :: averages(int blk){
   _average     = _block_av / double(_nsteps);
 
   _average(_index_cv) = (_beta * _beta) * (_average(_index_cv) - (_average(_index_tenergy) * _average(_index_tenergy) * (_npart * _npart))) / _npart;
-    
+  _average(_index_magnet) /= _npart;
+  _average(_index_chi) /= (_npart * _temp);
+
   _global_av  += _average;
   _global_av2 += _average % _average; // % -> element-wise multiplication
+
 
   // POTENTIAL ENERGY //////////////////////////////////////////////////////////
   if (_measure_penergy){
@@ -633,7 +639,8 @@ void System :: averages(int blk){
   }
   // TOTAL ENERGY //////////////////////////////////////////////////////////////
   if (_measure_tenergy){
-    coutf.open("OUTPUT/total_energy.dat",ios::app);
+    //Versione originale
+    /*coutf.open("OUTPUT/total_energy.dat",ios::app);
     average  = _average(_index_tenergy);
     sum_average = _global_av(_index_tenergy);
     sum_ave2 = _global_av2(_index_tenergy);
@@ -641,7 +648,21 @@ void System :: averages(int blk){
           << setw(18) << scientific << average
           << setw(18) << scientific << sum_average/double(blk)
           << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
-    coutf.close();
+    coutf.close();*/
+
+    //Versione modificata da me
+    average  = _average(_index_tenergy);
+    sum_average = _global_av(_index_tenergy);
+    sum_ave2 = _global_av2(_index_tenergy);
+
+    if(blk == _nblocks){  /*segno risultati solo all'ultimo blocco*/
+      coutf.open("OUTPUT/fin_toten.dat",ios::app);
+      coutf << _temp 
+        << setw(18) << scientific << sum_average/double(blk)
+        << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
+      coutf.close();
+    }
+    
   }
   // TEMPERATURE ///////////////////////////////////////////////////////////////
   if (_measure_temp){
@@ -671,7 +692,9 @@ void System :: averages(int blk){
   // TO BE FIXED IN EXERCISE 7
   // MAGNETIZATION /////////////////////////////////////////////////////////////
   if (_measure_magnet){
-    coutf.open("OUTPUT/magnetization.dat",ios::app);
+
+    // Versione originale
+    /*coutf.open("OUTPUT/magnetization.dat",ios::app);
     average  = _average(_index_magnet);
     sum_average = _global_av(_index_magnet);
     sum_ave2 = _global_av2(_index_magnet);
@@ -679,11 +702,27 @@ void System :: averages(int blk){
           << setw(18) << scientific << average
           << setw(18) << scientific << sum_average/double(blk)
           << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
-    coutf.close();
+    coutf.close();*/
+
+    //Versione modificata da me
+    average  = _average(_index_magnet);
+    sum_average = _global_av(_index_magnet);
+    sum_ave2 = _global_av2(_index_magnet);
+    
+    if(blk == _nblocks){  /*segno risultati solo all'ultimo blocco*/
+      coutf.open("OUTPUT/fin_magn.dat",ios::app);
+      coutf << _temp 
+        << setw(18) << scientific << sum_average/double(blk)
+        << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
+      coutf.close();
+    }
+
   }
   // SPECIFIC HEAT /////////////////////////////////////////////////////////////
   if (_measure_cv){
-    coutf.open("OUTPUT/specific_heat.dat",ios::app);
+
+    //Versione originale
+    /*coutf.open("OUTPUT/specific_heat.dat",ios::app);
     average  = _average(_index_cv);
     sum_average = _global_av(_index_cv);
     sum_ave2 = _global_av2(_index_cv);
@@ -691,11 +730,27 @@ void System :: averages(int blk){
           << setw(18) << scientific << average
           << setw(18) << scientific << sum_average/double(blk)
           << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
-    coutf.close();
+    coutf.close();*/
+
+    //Versione modificata da me
+    average  = _average(_index_cv);
+    sum_average = _global_av(_index_cv);
+    sum_ave2 = _global_av2(_index_cv);
+
+    if(blk == _nblocks){  /*segno risultati solo all'ultimo blocco*/
+      coutf.open("OUTPUT/fin_specheat.dat",ios::app);
+      coutf << _temp 
+        << setw(18) << scientific << sum_average/double(blk)
+        << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
+      coutf.close();
+    }
+
   }
   // SUSCEPTIBILITY ////////////////////////////////////////////////////////////
   if (_measure_chi){
-    coutf.open("OUTPUT/susceptibility.dat",ios::app);
+
+    //Versione originale
+    /*coutf.open("OUTPUT/susceptibility.dat",ios::app);
     average  = _average(_index_chi);
     sum_average = _global_av(_index_chi);
     sum_ave2 = _global_av2(_index_chi);
@@ -703,7 +758,21 @@ void System :: averages(int blk){
           << setw(18) << scientific << average
           << setw(18) << scientific << sum_average/double(blk)
           << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
-    coutf.close();
+    coutf.close();*/
+
+    //Versione modificata da me
+    average  = _average(_index_chi);
+    sum_average = _global_av(_index_chi);
+    sum_ave2 = _global_av2(_index_chi);
+
+    if(blk == _nblocks){  /*segno risultati solo all'ultimo blocco*/
+      coutf.open("OUTPUT/fin_susc.dat",ios::app);
+      coutf << _temp 
+        << setw(18) << scientific << sum_average/double(blk)
+        << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
+      coutf.close();
+    }
+
   }
   // ACCEPTANCE ////////////////////////////////////////////////////////////////
   double fraction;
@@ -728,6 +797,53 @@ int System :: get_nbl(){
 int System :: get_nsteps(){
   return _nsteps;
 }
+
+//Metodi aggiunti da me :)
+double System :: get_EnMeasure(){
+  return _measurement(_index_tenergy);
+}
+
+void System :: set_SymDuration(int Nblocks, int Nsteps){
+  _nblocks=Nblocks;
+  _nsteps=Nsteps;
+}
+
+void System :: set_Temp(double T){
+  _temp=T;
+  _beta=1/T;  /*riaggiorno anche beta che è quella che poi effettivamente entra nei calcoli*/
+}
+
+double System :: get_Temp(){
+  return _temp;
+}
+
+void System :: set_EqProperties(){
+  _measure_penergy  = false;
+  _measure_kenergy  = false;
+  _measure_tenergy  = true;   /*unica proprietà che serve per l'equilibrazione*/
+  _measure_pressure = false;
+  _measure_gofr     = false;
+  _measure_magnet   = false;
+  _measure_cv       = false;
+  _measure_chi      = false;
+
+  _nprop = 1;
+  _index_tenergy = 0;
+
+  // according to the number of properties, resize the vectors _measurement,_average,_block_av,_global_av,_global_av2
+  _measurement.resize(_nprop);
+  _average.resize(_nprop);
+  _block_av.resize(_nprop);
+  _global_av.resize(_nprop);
+  _global_av2.resize(_nprop);
+  _average.zeros();
+  _global_av.zeros();
+  _global_av2.zeros();
+  _nattempts = 0;
+  _naccepted = 0;
+}
+
+
 
 /****************************************************************
 *****************************************************************
