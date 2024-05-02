@@ -16,28 +16,28 @@ int main (int argc, char *argv[]){
     //Esercizio 7.2
     //Equilibrazione
     syst.set_EqProperties();    //inizializzo a mano le proprietà, con simtype=1 è energia potenziale mentre con simtype=0 è temperatura
-    syst.set_SymDuration(1, 600);   //lunghezza equilibrazione, il numero dei blocchi non mi interessa tanto guardo misure istantanee
+    syst.set_SymDuration(20, 2000);   //lunghezza equilibrazione, il numero dei blocchi non mi interessa tanto guardo misure istantanee
     ofstream eqout; 
     eqout.open("OUTPUT/eq_penergy.dat");  //file dove metto i dati per l'analisi
     InstEnergy(syst, eqout);    //ciclo di equilibrazione, eventualmente con raccolta dati per plot
     eqout.close();
     cout << "Equilibrazione conclusa." << endl;
-    
+
+/*    
     syst.set_SymDuration(1, 500000);   //lunghezza analisi, il numero dei blocchi non mi interessa tanto guardo misure istantanee
     ofstream anout; 
     anout.open("OUTPUT/inst_penergy.dat");  //file dove metto i dati per l'analisi
     InstEnergy(syst, anout);
     anout.close();
     cout << "Analisi per esercizio 7.2 conclusa." << endl;
+*/
 
-/*
     //Esercizio 7.4
     //Attenzione: va bene farlo in una parte diversa del codice? vanno bene i blocchi gestiti così? va bene fare pochi step o ne devo fare 5*10^5?
     syst.initialize_properties();   //ora devo simulare tutto
     syst.set_SymDuration(50, 2000);
     GofrAnalysis(syst);
     cout << "Analisi per esercizio 7.4 conclusa." << endl;
-*/
 
     syst.finalize();
 

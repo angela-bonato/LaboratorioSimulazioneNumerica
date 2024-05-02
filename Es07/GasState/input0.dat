@@ -9,3 +9,5 @@ NBLOCKS                10
 NSTEPS                 1000
 
 ENDINPUT
+
+#GasState

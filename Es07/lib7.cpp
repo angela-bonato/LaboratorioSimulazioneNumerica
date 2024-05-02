@@ -7,7 +7,7 @@ void InstEnergy(System& syst, ofstream& out){
         for(int j=0; j < syst.get_nsteps(); j++){ //loop over steps in a block
             syst.step();
             syst.measure();
-            out << scientific << syst.get_EnMeasure(1) << endl;   //flag=1 è energia potenziale
+            //out << scientific << syst.get_EnMeasure(1) << endl;   //flag=1 è energia potenziale
             if(j%10000==0) cout << j << endl;
         }
         syst.averages(i+1); // inutile per l'analisi ma almeno vedo l'accettazione
