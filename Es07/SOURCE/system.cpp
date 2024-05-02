@@ -558,7 +558,7 @@ void System :: measure(){ // Measure properties
 
   // POTENTIAL ENERGY //////////////////////////////////////////////////////////
   if (_measure_penergy){
-    penergy_temp = _vtail + 4.0 * penergy_temp / double(_npart);
+    penergy_temp = (_vtail + 4.0 * penergy_temp) / double(_npart);
     _measurement(_index_penergy) = penergy_temp;
   }
 
@@ -625,10 +625,10 @@ void System :: averages(int blk){
   if(_measure_chi) _average(_index_chi) /= (_npart * _temp);
   if(_measure_gofr){
     for(int i=0; i<_n_bins; i++){
-      double r=((i+1)*_bin_size)/2.; /*valore di r al centro del bin*/
+      double r=i*_bin_size; //valore di r all'inizio del bin
       double V=(4*M_PI/3.)*(pow(r+_bin_size, 3)-pow(r, 3));
-      double norm=_rho*_npart*V;  /*normalizzazione*/
-      _average(_index_gofr+i)/norm;
+      double norm=_rho*_npart*V;  //normalizzazione
+      _average(_index_gofr+i)/=norm;
     }
   }
 
@@ -728,7 +728,7 @@ void System :: averages(int blk){
         if(_sim_type==0){
           coutf.open("OUTPUT/fin_gofr0.dat",ios::app);
         }
-        coutf << ((i+1)*_bin_size)/2. /*questa poi sarà l'ascissa del mio plot*/
+        coutf << i*_bin_size /*questa poi sarà l'ascissa del mio plot*/
               << setw(18) << scientific << sum_average/double(blk)
               << setw(18) << scientific << this->error(sum_average, sum_ave2, blk) << endl;
         coutf.close();
@@ -824,7 +824,7 @@ void System :: averages(int blk){
   coutf.open("OUTPUT/acceptance.dat",ios::app);
   if(_nattempts > 0) fraction = double(_naccepted)/double(_nattempts);
   else fraction = 0.0; 
-  coutf << setw(12) << blk << setw(12) << fraction << endl;
+  coutf << setw(18) << blk << setw(18) << fraction << endl;
   coutf.close();
   
   return;
@@ -868,8 +868,15 @@ double System :: get_Temp(){
   return _temp;
 }
 
-void System :: set_PotProperties(){
-  _measure_penergy  = true;   /*unica proprietà che serve per l'equilibrazione*/
+void System :: set_EqProperties(){
+  if(_sim_type==1){
+    _measure_penergy  = true;
+    _measure_temp = false;
+  }
+   if(_sim_type==0){
+    _measure_penergy  = false;
+    _measure_temp = true;
+  }
   _measure_kenergy  = false;
   _measure_tenergy  = false;
   _measure_pressure = false;
@@ -879,7 +886,8 @@ void System :: set_PotProperties(){
   _measure_chi      = false;
 
   _nprop = 1;
-  _index_penergy = 0;
+  if(_sim_type==1) _index_penergy = 0;
+  if(_sim_type==0) _index_temp = 0;
 
   // according to the number of properties, resize the vectors _measurement,_average,_block_av,_global_av,_global_av2
   _measurement.resize(_nprop);

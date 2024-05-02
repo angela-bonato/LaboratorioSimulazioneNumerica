@@ -37,7 +37,7 @@ double Rarandom(){
 void BlockMean(double av, vector<double> &sumbs, vector<double> &avbs, int B){
     sumbs[0]+=av;
     sumbs[1]+=av*av;
-    avbs[0]=sumbs[0]/(B+1);
+    avbs[0]=sumbs[0]/(B+1);     /*uso questa funzione in cicli in cui i blocchi partono da indice 0*/
     avbs[1]=sumbs[1]/(B+1);
 }
 

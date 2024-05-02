@@ -10,6 +10,7 @@ void InstEnergy(System& syst, ofstream& out){
             out << scientific << syst.get_EnMeasure(1) << endl;   //flag=1 è energia potenziale
             if(j%10000==0) cout << j << endl;
         }
+        syst.averages(i+1); // inutile per l'analisi ma almeno vedo l'accettazione
         syst.block_reset(i+1);
     }
     syst.block_reset(0);
@@ -24,6 +25,7 @@ void GofrAnalysis(System& syst){
         }
         syst.averages(i+1);
         syst.block_reset(i+1);
+        cout << i << endl;
     }
     syst.block_reset(0);
 }

@@ -95,8 +95,8 @@ public: // Function declarations
   void set_Temp(double T);
   //Restituisce temperatura sistema
   double get_Temp();
-  //Per equilibrazione misuro solo energia tot, inutile mettere già tutto
-  void set_PotProperties();
+  //Inizializzo solo proprietà che mi servono per equilibrare
+  void set_EqProperties();
   //Fa un passo di algoritmo di Gibbs, prende lo spin pre passo (input è indice che identifica particella in esame) e decide il valore dello spin finale (cioè se flippare o no)
   void gibbs(int i);
   //Cambia il tipo di simulazione
