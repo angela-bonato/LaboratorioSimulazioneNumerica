@@ -566,7 +566,7 @@ void System :: measure(){ // Measure properties
   if (_measure_temp and _measure_kenergy) _measurement(_index_temp) = (2.0/3.0) * kenergy_temp;
   // PRESSURE //////////////////////////////////////////////////////////////////
   if (_measure_pressure){
-    pressure_temp = _ptail + (_rho*_measurement(_index_temp)) + ((48/(3.*_volume)) * pressure_temp/double(_npart));   /*non so se è giusto perchè ci vorrebbe un valor medio ma non ho capito*/
+    pressure_temp = _ptail + (_rho*_measurement(_index_temp)) + ((48/(3.*_volume)) * pressure_temp);   /*non so se è giusto perchè ci vorrebbe un valor medio ma non ho capito*/
     _measurement(_index_pressure) = pressure_temp;
   }
 

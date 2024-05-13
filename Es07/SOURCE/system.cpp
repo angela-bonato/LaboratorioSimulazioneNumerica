@@ -344,7 +344,7 @@ void System :: initialize_properties(){ // Initialize data members used for meas
         _measure_pressure = true;
         _index_pressure = index_property;
         index_property++;
-        _ptail = 3*_npart*32*M_PI*_rho*((1./(9*pow(_r_cut, 9)))-(1./(6*pow(_r_cut, 3))));
+        _ptail = (_npart/_volume)*32*M_PI*_rho*((1./(9*pow(_r_cut, 9)))-(1./(6*pow(_r_cut, 3))));
       } else if( property == "GOFR" ){
         /*ofstream coutgr("OUTPUT/gofr.dat");
         coutgr << "# DISTANCE:     AVE_GOFR:        ERROR:" << endl;

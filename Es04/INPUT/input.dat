@@ -1,9 +1,9 @@
 SIMULATION_TYPE        0
 RESTART                1
-TEMP                   0.8
+TEMP                   1.2
 NPART                  108
-RHO                    1.1
-R_CUT                  2.2
+RHO                    0.05
+R_CUT                  5.0
 DELTA                  0.0005
 NBLOCKS                20
 NSTEPS                 2000

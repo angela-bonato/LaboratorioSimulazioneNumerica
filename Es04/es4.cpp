@@ -27,6 +27,7 @@ int main (int argc, char *argv[]){
         }
         syst.averages(i+1);
         syst.block_reset(i+1);
+        cout << i << endl;
     }
     syst.finalize();
 
