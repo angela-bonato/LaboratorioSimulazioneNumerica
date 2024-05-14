@@ -2,14 +2,23 @@
 
 using namespace std;
 
-vector<double> GenerateStep(Random& rand, double x, double delta){
+double GenerateStep(Random& rand, double x, double delta){
     //genero uniformemente attorno al punto dato con raggio delta
     return rand.Rannyu(x-delta, x+delta);
 }
 
 double TargetDistribution(double x, double mu, double sigma){
-    double psi = 
-    return psi*psi;
+    double psi = exp((-(x-mu)*(x-mu))/(2*sigma*sigma))+exp((-(x+mu)*(x+mu))/(2*sigma*sigma));   //funzione d'onda
+    double integral = 2*sigma*sqrt(M_PI)*(1+exp(-(mu*mu)/(sigma*sigma)));     //integrale del modulo quadro della funzione d'onda calcolato analiticamente
+    return (psi*psi)/integral;
+}
+
+double LocalEnergy(double x, double mu, double sigma){
+      //uses natural constants
+    double derivative=((1/(sigma*sigma))*exp((-(x-mu)*(x-mu))/(2*sigma*sigma))*(-1+((x-mu)*(x-mu))/(sigma*sigma)))+((1/(sigma*sigma))*exp((-(x+mu)*(x+mu))/(2*sigma*sigma))*(-1+((x+mu)*(x+mu))/(sigma*sigma))); 
+    double v=pow(x, 4)-(5./2.)*x*x;
+    double psi=TargetDistribution(x, mu, sigma);
+    return v+((-(1./2.)*derivative)/psi);
 }
 
 void Acceptance(Random& rand, Acc& a, double prec, double pres){
@@ -23,10 +32,9 @@ void Acceptance(Random& rand, Acc& a, double prec, double pres){
     }
 }
 
-vector<double> MetropolisStep(Random& rand, vector<double> prec, int p, int t, Acc& a, double delta, double& tarprec){
-    vector<double> pres(3, 0.);
-    pres=GenerateStep(rand, prec, t, delta);    /*candidato punto per lo step presente*/
-    double tarpres=TargetDistribution(pres, p);
+double MetropolisStep(Random& rand, double prec, Acc& a, double delta, double mu, double sigma, double& tarprec){
+    double pres=GenerateStep(rand, prec, delta);    /*candidato punto per lo step presente*/
+    double tarpres=TargetDistribution(pres, mu, sigma);
     Acceptance(rand, a, tarprec, tarpres);
     if(a.accept){
         tarprec=tarpres;    /*il candidato viene accettato come punto dello step presente ergo sarà la partenza del prossimo step*/
@@ -37,25 +45,20 @@ vector<double> MetropolisStep(Random& rand, vector<double> prec, int p, int t, A
     }
 }
 
-vector<double> Equilibration(vector<double> start, int p, int t, int A, double delta, ofstream& eqout, ofstream& epout){
+double Equilibration(double start, int A, double delta, double mu, double sigma){
     Random rand;
     InizRandom(rand);    /*inizializzo il generatore*/
 
-    vector<double> prec(3, 0.);    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
-    prec=start;
-    double tarprec=TargetDistribution(prec, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
+    double prec=start;    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
+    double tarprec=TargetDistribution(prec, mu, sigma);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
 
-    vector<double> pres(3, 0.);     /*qua di volta in volta genero il passo presente*/
+    double pres=0;     /*qua di volta in volta genero il passo presente*/
 
     double meanacc=0;   /*media accettazione*/ 
 
     for(int i=0; i<A; i++){     /*ciclo piccolo tanto è solo per vedere il valor medio di accettazione*/
         Acc a;
-        pres=MetropolisStep(rand, prec, p, t, a, delta, tarprec);  /*genero un punto in R^3 secondo la distribuzione target*/
-
-        eqout << EvaluateRadius(pres) << setw(18) << a.alpha << endl;
-        PrintPosition(pres, epout);
-
+        pres=MetropolisStep(rand, prec, a, delta, mu, sigma, tarprec);  /*genero un punto in R^3 secondo la distribuzione target*/
         meanacc+=a.alpha;
         prec=pres;  /*aggiorno il passo*/
     }
@@ -67,49 +70,42 @@ vector<double> Equilibration(vector<double> start, int p, int t, int A, double d
     return prec;    /*punto finale che è inizio dell'analisi dati*/
 }
 
-void PrintPosition(vector<double> pos, ofstream& out){
-    out << setw(18) << pos[0] 
-        << setw(18) << pos[1]
-        << setw(18) << pos[2] << endl;
-}
-
-void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta, ofstream& u1pout, ofstream& u1rout){
+void EnergyAnalysis(double start, int N, int L, double delta, double mu, double sigma, ofstream& xout, ofstream& eout){
     Random rand;
     InizRandom(rand);    /*inizializzo il generatore*/
 
     vector<double> valuebs(2, 0.);  /*valor medio a blocchi e suo quadrato*/
     vector<double> sumbs(2, 0.);  /*somma a blocchi e suo quadrato*/
 
-    vector<double> prec(3, 0.);    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
-    prec=start;
-    double tarprec=TargetDistribution(prec, p);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
+    double prec=start;    /*posizione al passo precedente, all'inizio è start ma poi la aggiorno ad ogni passo*/
+    double tarprec=TargetDistribution(prec, mu, sigma);    /*inizializzo il valore della distribuzione target al passo iniziale*/   
 
-    vector<double> pres(3, 0.);     /*qua di volta in volta genero il passo presente*/
+    double pres=0;     /*qua di volta in volta genero il passo presente*/
 
     for(int i=0; i<N; i++){     /*ciclo sui blocchi*/
-        double sumr=0.;  /*somma cumulativa di r nel blocco*/
+        double sumle=0.;  /*somma cumulativa dell'energia locale nel blocco*/
         for(int j=0; j<L; j++){     /*ciclo che svolge il blocco*/
             Acc a;
-            pres=MetropolisStep(rand, prec, p, t, a, delta, tarprec);  /*genero un punto in R^3 secondo la distribuzione target*/
+            pres=MetropolisStep(rand, prec, a, delta, mu, sigma, tarprec);  /*genero un punto in R secondo la distribuzione target*/
             if((i%50)==0){  /*stampo una posizione ogni tot altrimenti mi viene un file pesantissimo*/
-                if(u1pout.is_open()){
-                    PrintPosition(pres, u1pout);
+                if(xout.is_open()){
+                    xout << pres << endl;
                 }    
-                else cerr << "Errore: impossibile aprire il file di output delle posizioni" << endl;    
+                else cerr << "Errore: impossibile aprire il file di output delle x generate." << endl;    
             }
             
             prec=pres;  /*aggiorno il passo*/
 
-            sumr+=EvaluateRadius(pres);  /*calcolo il valore r corrispondente aggiornando la somma del blocco*/
+            sumle+=LocalEnergy(pres, mu, sigma);  /*calcolo il valore dell'energia locale corrispondente aggiornando la somma del blocco*/
         }
-        double rmean=sumr/L;    /*<r> nell'i-esimo blocco*/
+        double rmean=sumle/L;    /*<H> nell'i-esimo blocco*/
 
         BlockMean(rmean, sumbs, valuebs, i);   /*aggiorno la media a blocchi*/
-        if(u1rout.is_open()){
-            u1rout << setw(18) << scientific << valuebs[0] 
+        if(eout.is_open()){
+            eout << setw(18) << scientific << valuebs[0] 
                 << setw(18) << scientific << BlockError(valuebs, i) << endl;    /*variabili da plottare*/
         }
-        else cerr << "Errore: impossibile aprire il file di output dei raggi medi" << endl;
+        else cerr << "Errore: impossibile aprire il file di output dei valori medi di energia locale." << endl;
 
     }
 

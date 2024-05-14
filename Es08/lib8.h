@@ -16,19 +16,18 @@ struct Acc{
 };
 
 //genera lo step successivo al punto dato con probabilità di transizione uniforme
-vector<double> GenerateStep(Random& rand, vector<double> pos, int t, double delta);
-//data una posizione cartesiana calcola il raggio delle coordinate sferiche
-double EvaluateRadius(vector<double> pos);
-//valuta la densità di probabilità target nel punto dato, riceve in ingresso anche una flag che gli dice quale funzione usare (se psi100=1 o psi210=2)
-double TargetDistribution(vector<double> pos, int p);
+double GenerateStep(Random& rand, double x, double delta);
+//valuta la densità di probabilità target nel punto dato
+double TargetDistribution(double x, double mu, double sigma);
+//calcola il valore dell'energia locale nel punto x generato con Metropolis
+double LocalEnergy(double x, double mu, double sigma);
+
 //valuta l'accettazione, data dal minimo fra 1 e il rapporto fra TargetDistribution del passo precedente e del punto candidato per il passo presente (che sono i due argomenti della funzione), poi decide se accettare (true) o rifiutare (false) il punto proposto da GenerateStep
 void Acceptance(Random& rand, Acc& a, double prec, double pres);
-//genera un punto in R^3 secondo Metropolis prendendo in ingresso il punto precedente, una flag che indica la probabilità target, una flag che indica la probabilità secodno cui accetto gli step, un parametro per la distribuzione step, un double che tiene in memoria TargetDistribution calcolata al punto precedente
-vector<double> MetropolisStep(Random& rand, vector<double> prec, int p, int t, Acc& d, double delta, double& tarprec);
+//genera un punto in R secondo Metropolis prendendo in ingresso il punto precedente
+double MetropolisStep(Random& rand, double prec, Acc& a, double delta, double mu, double sigma, double& tarprec);
 
-//fa un po' di passi del metropolis e valuta l'accettazione e il raggio, utile a capire se la delta impostata è corretta e a dare il punto di partenza per l'analisi
-vector<double> Equilibration(vector<double> start, int p, int t, int A, double delta, ofstream& eqout, ofstream& epout);
-//stampa le posizioni su file
-void PrintPosition(vector<double> pos, ofstream& out);
-//fa effettivamente l'analisi dati
-void DataAnalysis(vector<double> start, int N, int L, int p, int t, double delta, ofstream& u1pout, ofstream& u1rout);
+//fa un po' di passi del metropolis e valuta l'accettazione, utile a capire se la delta impostata è corretta e a dare il punto di partenza per l'analisi
+double Equilibration(double start, int A, double delta, double mu, double sigma);
+//fa effettivamente l'analisi dati dell'esercizio 8.1 (Variational Monte Carlo con parametri fissi)
+void EnergyAnalysis(double start, int N, int L, double delta, double mu, double sigma, ofstream& xout, ofstream& eout);
