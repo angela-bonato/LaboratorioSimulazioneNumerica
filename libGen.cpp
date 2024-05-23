@@ -48,5 +48,34 @@ double BlockError(vector<double> &vals, int B){
     else{
         return sqrt((vals[1]-(vals[0]*vals[0]))/B);   /*barra d'errore sul B-esimo blocco*/
     }
-}      
+}     
+
+int BinSearchInt(int l, int r, double k, vector<double> &maxs, int M){
+   // if(k<maxs[l] || k>maxs[r]){
+     //   cerr << "Errore: intervallo invalido esaminato da BinSearchInt." << endl;
+       // return -1;
+    //}
+    if(l==0 && 0.<=k && k<maxs[0]){  /*maxs[0] contiene il massimo del primo intervallo quindi se k sta nel primo intervallo serve un caso a parte*/
+        return l;
+    }
+    if(r==M && k==maxs[r]){    /*devo esaminare [0, M] ma sto valutando insiemi aperti [a, b) ergo qua chiudo l'ultimo sottointervallo*/
+        return r;
+    }
+    if((r-l)==1 && maxs[l]<=k && k<maxs[r]){     /*caso base dell'algoritmo divide et impera*/
+        return r;
+    }
+    if((r-l)>1){    /*chiamate ricorsive dell'algoritmo*/
+        int h=(l+r)/2;
+        if(maxs[h]<k){
+            return BinSearchInt(h, r, k, maxs, M);
+        }
+        else{
+            return BinSearchInt(l, h, k, maxs, M);
+        }
+    }
+    else{
+        return -1;
+    }
+}
+
 

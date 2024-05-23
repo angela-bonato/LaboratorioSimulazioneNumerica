@@ -227,7 +227,7 @@ void SimAnnealing(double delta, double mu_start, double sigma_start, double beta
             BestVal(best_values, pres);     /*se l'energia calcolata è minore della precedente aggiorno i best_params*/
 
             /*ogni 20 passi totali registro il valore di mu e sigma*/
-            if((m+1)%20==0){
+            if((m+1)%5==0){
                 if(pout.is_open()){
                     pout << setw(18) << (m+1)
                         << setw(18) << scientific << pres.mu 

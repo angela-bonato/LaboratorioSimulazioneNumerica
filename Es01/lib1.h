@@ -7,9 +7,6 @@
 
 using namespace std;
 
-//con approccio divide et impera cerca l'indice dell'estremo superiore del sottointervallo in cui si trova il numero estratto esaminando un array con i massimi di tutti gli intervalli
-int BinSearchInt(int l, int r, double k, vector<double> &maxs, int M);  
-
 //calcolo dei dati usati per le figure 1 e 2 dell'esercizio 1.1
 void DataAveVar(int N, int L, ofstream& aout, ofstream& vout);  
 
