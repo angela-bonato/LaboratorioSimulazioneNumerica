@@ -11,8 +11,8 @@ vector<City> InitCircularCities(int N){
 
     for(int i=0; i<N; i++){
         double theta=rand.Rannyu(0, 2*M_PI);
+        
         City city;
-
         city.set_n(i);
         city.set_x(cos(theta));
         city.set_y(sin(theta));
@@ -35,8 +35,8 @@ vector<City> InitSquareCities(int N){
     for(int i=0; i<N; i++){
         double a=rand.Rannyu();
         double b=rand.Rannyu();
+        
         City city;
-
         city.set_n(i);
         city.set_x(a);
         city.set_y(b);
@@ -60,44 +60,59 @@ vector<Path> InitRandomPop(Random& rand, int N, int P){
     vector<int> order;
     for(int i=0; i<N; i++) order.push_back(i);
     order.push_back(0);
+    
     vector<Path> population;
     while(int(population.size())<P){
         Path path;
         path.set_Nc(N);
-        path.set_ord(order);
+
+        if(int(population.size())==0) path.set_ord(order);
+        else path.set_ord(population[population.size()-1].get_ord());
+
         for(int j=0; j<N/2; j++){
             int a=int(rand.Rannyu(1, N));
             int b=int(rand.Rannyu(1, N));
+            while(a==b){
+                b=int(rand.Rannyu(1, N));
+            }
             Swap(path, a, b);
         }
+
         if(path.IsValid()) population.push_back(path); 
         else cerr << "Random invalid" << endl;
     }
+
     return population;
 }
 
 void CrossoverOperator(Random& rand, Path p1, Path p2, Path& s1, Path& s2, double pc){
     double r=rand.Rannyu();
+
     if(r<=pc){
         int l=p1.get_length()-1;
+
         int c=int(rand.Rannyu(1, l));
         vector<int> one, two;
         for(int i=0; i<c; i++){
             one.push_back(p1.get_ord(i));
             two.push_back(p2.get_ord(i));
         }
+
         for(int j=1; j<l; j++){
             for(int i=c; i<l; i++){
                 if(p1.get_ord(i)==p2.get_ord(j)) one.push_back(p1.get_ord(i));
                 if(p2.get_ord(i)==p1.get_ord(j)) two.push_back(p2.get_ord(i));
             }
         }
+
         one.push_back(0);
         two.push_back(0);
         s1.set_ord(one);
         s2.set_ord(two);
+
         if(!s1.IsValid() || !s2.IsValid()) cout << "Invalid crossover" << endl;
     }
+
     else{
         s1.set_ord(p1.get_ord());
         s2.set_ord(p2.get_ord());
@@ -106,15 +121,18 @@ void CrossoverOperator(Random& rand, Path p1, Path p2, Path& s1, Path& s2, doubl
 
 void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double pm3, double pm4){
     //tutte le mutazioni devono preservare primo e ultimo elemento!
-    double r1=rand.Rannyu();
     int l=path.get_length()-1;
+
+    double r1=rand.Rannyu();
     if(r1<=pm1){
         //prima mutazione: swap fra due elementi scelti a caso (escluso primo e ultimo)
         int a=int(rand.Rannyu(1, l));
         int b=int(rand.Rannyu(1, l));
+        while(a==b) b=int(rand.Rannyu(1, l));
         Swap(path, a, b);
         if(!path.IsValid()) cout << "Mut1 invalid" << endl;
     }
+
     double r2=rand.Rannyu();
     if(r2<=pm2){
         //seconda mutazione: shifto in avanti i primi m elementi di n posti
@@ -128,6 +146,7 @@ void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double p
         for(int i=m+1; i<l; i++){
             two.push_back(path.get_ord(i));
         }
+
         for(int i=1; i<l; i++){
             int p=i+n;
             if(p>=l) p=n-(l-1-i);
@@ -138,18 +157,19 @@ void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double p
                 path.set_ord(p, two[i-1-m]);
             }
         }
+
         if(!path.IsValid()) cout << "Mut2 invalid" << endl;
     }
+
     double r3=rand.Rannyu();
     if(r3<=pm3){
         //terza mutazione: scambio m elementi contigui nella prima metà con m elementi contigui nella seconda metà
         int m=int(rand.Rannyu(1, l/2));
         int mid=l/2;
-        for(int i=1; i<m; i++){
-            Swap(path, i, mid+i);
-        }
+        for(int i=1; i<m; i++) Swap(path, i, mid+i);
         if(!path.IsValid()) cout << "Mut3 invalid" << endl;
     }
+
     double r4=rand.Rannyu();
     if(r4<=pm4){
         //quarta mutazione: inverto l'ordine di un gruppo di m elementi da una posizione n in poi
@@ -162,6 +182,7 @@ void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double p
             if(right>=l) right-=(l-1);
             Swap(path, left, right);
         }
+
         if(!path.IsValid()) cout << "Mut4 invalid" << endl;
     }
 }
@@ -190,6 +211,7 @@ Path FindPath(vector<Path> population, double loss){
     for(int i=0; i<int(population.size()); i++){
         if(population[i].get_loss()==loss) return population[i];
     }
+
     cerr << "Errore: best_path non trovato, impostato su un path casuale" << endl;
     return population[0];
 }
@@ -203,30 +225,41 @@ vector<Path> ReplaceGeneration(Random& rand, vector<Path> old_population, vector
         loss.push_back(old_population[i].get_loss());
         tot_loss+=loss[i];
     }
+
     WriteBestHalf(loss, s, bout, bhout);
     if(loss[0]<best_path.get_loss()) best_path=FindPath(old_population, loss[0]);
     vector<double> sel_prob;
 
+    //calcolo probabilità to sia normalizzata su [0,1] e sia maggiore minore è la loss function
     for(int i=0; i<np; i++){
-        if(i==0) sel_prob.push_back(1.0-(old_population[i].get_loss()/tot_loss));
-        else sel_prob.push_back(sel_prob[i-1]+1.0-(old_population[i].get_loss()/tot_loss));
+        if(i==0) sel_prob.push_back((1.0-pow(old_population[i].get_loss()/tot_loss, 3))/double(np));
+        else sel_prob.push_back(sel_prob[i-1]+(1.0-pow(old_population[i].get_loss()/tot_loss, 3))/double(np));
     }
 
     vector<Path> new_population;
     while(int(new_population.size())<=np-2){
-        double r1=rand.Rannyu(0, sel_prob[sel_prob.size()-1]);
+        double r1=rand.Rannyu();
         int e1=BinSearchInt(0, np, r1, sel_prob, np);
         double r2=rand.Rannyu();
         int e2=BinSearchInt(0, np, r2, sel_prob, np);
+        while(e2==e1){
+            r2=rand.Rannyu(0, sel_prob[sel_prob.size()-1]);
+            e2=BinSearchInt(0, np, r2, sel_prob, np);
+        }
+
         Path son1, son2;
         son1.set_Nc(N);
         son2.set_Nc(N);
         CrossoverOperator(rand, old_population[e1], old_population[e2], son1, son2, pc);
         MutationOperator(rand, son1, pm1, pm2, pm3, pm4);
         MutationOperator(rand, son2, pm1, pm2, pm3, pm4);
-        if(son1.IsValid()) new_population.push_back(son1);
-        if(son2.IsValid()) new_population.push_back(son2); 
+
+        if(son1.IsValid() && son2.IsValid()){
+            new_population.push_back(son1);
+            new_population.push_back(son2); 
+        } 
     }
+
     return new_population;
 }
 
@@ -237,6 +270,7 @@ void TravSalesProb(vector<City> cities,int N, int P, int S, double pc, double pm
     vector<Path> new_population;
     Path best_path=starting_population[0];
     best_path.EvalLoss(cities);
+
     for(int s=0; s<S; s++){
         new_population=ReplaceGeneration(rand, starting_population, cities, N, pc, pm1, pm2, pm3, pm4, s, bout, bhout, best_path);
         starting_population=new_population;
