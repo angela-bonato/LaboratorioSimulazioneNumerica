@@ -187,64 +187,48 @@ void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double p
     }
 }
 
-void WriteBestHalf(vector<double>& loss, int s, ofstream& bout, ofstream& bhout){
-    sort(loss.begin(), loss.end());
+bool ComparePaths(Path a, Path b){
+    return a.get_loss() < b.get_loss();
+}
 
-    if(bout.is_open()) bout << scientific << loss[0] << endl;
+void WriteBest(vector<Path> population, int s, ofstream& bout, ofstream& bhout){
+    if(bout.is_open()) bout << scientific << population[0].get_loss() << endl;
     else cerr << "Errore: impossibile aprire bestloss.dat" << endl;
 
-    size_t half_size=loss.size()/2;
-    double mean=accumulate(loss.begin(), loss.begin()+half_size, 0.0);
-    mean/=int(loss.size())/2;
+    double mean=0.0;
+    for(int i=0; i<int(population.size())/2; i++){
+        mean+=population[i].get_loss();
+    }
+    mean/=(double(population.size())/2.0);
 
     double stdev=0.0;
-    for(int i=0; i<int(loss.size())/2; i++){
-        stdev+=(loss[i]-mean)*(loss[i]-mean);
+    for(int i=0; i<int(population.size())/2; i++){
+        stdev+=(population[i].get_loss()-mean)*(population[i].get_loss()-mean);
     }
-    stdev=sqrt(stdev/double(half_size));
+    stdev=sqrt(stdev/(double(population.size())/2.0));
 
     if(bhout.is_open()) bhout << scientific << mean << "  " << scientific << stdev << endl;
     else cerr << "Errore: impossibile aprire besthalfloss.dat" << endl;
 }
 
-Path FindPath(vector<Path> population, double loss){
-    for(int i=0; i<int(population.size()); i++){
-        if(population[i].get_loss()==loss) return population[i];
-    }
-
-    cerr << "Errore: best_path non trovato, impostato su un path casuale" << endl;
-    return population[0];
-}
-
 vector<Path> ReplaceGeneration(Random& rand, vector<Path> old_population, vector<City> cities, int N, double pc, double pm1, double pm2, double pm3, double pm4, int s, ofstream& bout, ofstream& bhout, Path& best_path){
     int np=old_population.size();
-    double tot_loss=0.0;
-    vector<double> loss;
-    for(int i=0; i<np; i++){
-        old_population[i].EvalLoss(cities);
-        loss.push_back(old_population[i].get_loss());
-        tot_loss+=loss[i];
-    }
+    for(int i=0; i<np; i++) old_population[i].EvalLoss(cities);
+    sort(old_population.begin(), old_population.end(), ComparePaths);   //ordino la popolazione in modo che l'indice più basso sia quello del path con loss più bassa
 
-    WriteBestHalf(loss, s, bout, bhout);
-    if(loss[0]<best_path.get_loss()) best_path=FindPath(old_population, loss[0]);
-    vector<double> sel_prob;
-
-    //calcolo probabilità to sia normalizzata su [0,1] e sia maggiore minore è la loss function
-    for(int i=0; i<np; i++){
-        if(i==0) sel_prob.push_back((1.0-pow(old_population[i].get_loss()/tot_loss, 3))/double(np));
-        else sel_prob.push_back(sel_prob[i-1]+(1.0-pow(old_population[i].get_loss()/tot_loss, 3))/double(np));
-    }
+    WriteBest(old_population, s, bout, bhout);
+    if(old_population[0].get_loss() < best_path.get_loss()) best_path=old_population[0];
 
     vector<Path> new_population;
     while(int(new_population.size())<=np-2){
+        //a questo punto sfrutto l'ordinamento per estrarre con la probabilità desiderata
         double r1=rand.Rannyu();
-        int e1=BinSearchInt(0, np, r1, sel_prob, np);
+        int e1=int(np*pow(r1, 5));
         double r2=rand.Rannyu();
-        int e2=BinSearchInt(0, np, r2, sel_prob, np);
+        int e2=int(np*pow(r2, 5));
         while(e2==e1){
-            r2=rand.Rannyu(0, sel_prob[sel_prob.size()-1]);
-            e2=BinSearchInt(0, np, r2, sel_prob, np);
+            r2=rand.Rannyu();
+            e2=int(np*pow(r2, 5));
         }
 
         Path son1, son2;

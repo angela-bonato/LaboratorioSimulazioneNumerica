@@ -6,10 +6,10 @@ int main (int argc, char *argv[]){
     //variabili generali
     int Ncities=34; //numero città considerate
     int Npaths=400;  //numero path per ogni generazione DEVONO ESSERE PARI
-    int Nsteps=500;    //numero generazioni considerate
-    double pc=0.7;  //probabilità di crossover
+    int Nsteps=200;    //numero generazioni considerate
+    double pc=0.6;  //probabilità di crossover
     double pm1=0.07; //probabilità prima mutazione
-    double pm2=0.03; //probabilità seconda mutazione
+    double pm2=0.06; //probabilità seconda mutazione
     double pm3=0.05; //probabilità terza mutazione
     double pm4=0.04; //probabilità quarta mutazione
     ofstream bout;  //output loss del best path di ogni generazione

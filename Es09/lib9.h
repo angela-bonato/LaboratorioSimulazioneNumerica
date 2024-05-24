@@ -25,10 +25,10 @@ void CrossoverOperator(Random& rand, Path p1, Path p2, Path& s1, Path& s2, doubl
 //operatore di mutazione con le 4 mutazioni descritte nel notebook del prof
 void MutationOperator(Random& rand, Path& path, double pm1, double pm2, double pm3, double pm4);
 
+//dà regola a sort per ordinare
+bool ComparePaths(Path a, Path b);
 //funzione che scrive nei files di output tutti i dati richiesti
-void WriteBestHalf(vector<double>& loss, int s, ofstream& bout, ofstream& bhout);
-//trova in una popolazione il path che ha loss=a quella data
-Path FindPath(vector<Path> population, double loss);
+void WriteBest(vector<Path> population, int s, ofstream& bout, ofstream& bhout);
 //operatore di selezione, fa già tutte le operazioni necessarie per restituire la nuova popolazione
 vector<Path> ReplaceGeneration(Random& rand, vector<Path> old_population, vector<City> cities, int N, double pc, double pm1, double pm2, double pm3, double pm4, int s, ofstream& bout, ofstream& bhout, Path& best_path);
 

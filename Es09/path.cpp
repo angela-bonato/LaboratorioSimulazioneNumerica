@@ -27,11 +27,7 @@ void Path::set_ord(int index, int value){
 int Path::get_length(){
     return _L;
 }
-
-void Path::set_p(double myp){
-    _ps=myp;
-} 
-       
+   
 bool Path::IsValid(){
     if(int(_order.size())!=(_Nc+1)) {
         cerr << "Path invalido: lunghezza sbagliata." << endl;

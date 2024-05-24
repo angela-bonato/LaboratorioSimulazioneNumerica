@@ -17,8 +17,6 @@ class Path{
         int _L;
         //valore della loss function calcolato 
         double _loss;  
-        //probabilità di selezione calcolata dall'apposito operatore
-        double _ps; 
         //numero di città considerate
         int _Nc; 
 
@@ -33,8 +31,6 @@ class Path{
         void set_Nc(int N);
         //restituisce L
         int get_length();
-        //setta la probabilità di selezione  
-        void set_p(double myp); 
         //controlla che il path rispetti tutti i vincoli imposti dal problema  
         bool IsValid();  
         //calcola la loss function del percorso, prende in ingresso il vettore delle città da analizzare secondo l'ordine che ha il path come membro   
