@@ -5,7 +5,7 @@ using namespace std;
 int main (int argc, char *argv[]){
     //variabili generali
     int Ncities=34; //numero città considerate
-    int Npaths=400;  //numero path per ogni generazione DEVONO ESSERE PARI
+    int Npaths=900;  //numero path per ogni generazione DEVONO ESSERE PARI
     int Nsteps=200;    //numero generazioni considerate
     double pc=0.6;  //probabilità di crossover
     double pm1=0.07; //probabilità prima mutazione
