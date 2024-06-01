@@ -87,9 +87,9 @@ int main (int argc, char *argv[]){
     rand.SetRandom(seed, p1, p2);   //ogni processo inizializza il suo rand
     
     //variabili generali, dovrebbero già definirsi in ogni processo scrivendole qui
-    int Npaths=1000;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
-    int Ntot=1000;     //numero step totali i.e., Nmigr*Ncont (Ncont=numero di migrazioni dopo cui faccio swap)
-    int Nmigr=100;    //numero generazioni considerate da ogni processo indipendente (i.e., step in un continente)
+    int Npaths=2500;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
+    int Ntot=3000;     //numero step totali i.e., Nmigr*Ncont (Ncont=numero di migrazioni dopo cui faccio swap)
+    int Nmigr=150;    //numero generazioni considerate da ogni processo indipendente (i.e., step in un continente)
     double pc=0.6;  //probabilità di crossover
     double pm1=0.07; //probabilità prima mutazione
     double pm2=0.06; //probabilità seconda mutazione
@@ -115,7 +115,7 @@ int main (int argc, char *argv[]){
         new_population=ReplaceGeneration(rand, starting_population, Cities, Ncities, pc, pm1, pm2, pm3, pm4, s, bout, bhout, best_path);
 
         //alla fine di ogni continente swappo (questa parte va commentata per fare l'analisi indipendente)
-        if(s!=0 && s%Nmigr==0){
+/*        if(s!=0 && s%Nmigr==0){
             //il processo principale genera le coppie, ATTENZIONE: QUA FUNZIONA SOLO SE SI AVVIANO ALMENTO 4 PROCESSI
             int inds[4];
             if(rank==0){
@@ -146,7 +146,7 @@ int main (int argc, char *argv[]){
             
             if(rank==inds[2]) cout << "Swap " << s/Nmigr <<" fatto." << endl;
         }
-
+*/
         //proseguo algoritmo genetico
         starting_population=new_population;
     }
