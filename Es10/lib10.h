@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <iostream>
 #include <numeric>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "city.h"
 #include "path.h"
 #include "../libGen.h"
@@ -10,8 +13,11 @@
 
 using namespace std;
 
+//leggo solo la riga i di un file
+bool ReadIthLine(ifstream& inprimes, int i, int& p1, int& p2);
+
 //funzione che ritorna un vettore di città con posizioni nel file di input
-vector<City> InitCities(ifstream infile);
+vector<City> InitCities(ifstream& infile);
 
 //scambia fra loro gli elementi in posizione a e b di path._order
 void Swap(Path& path, int a, int b);

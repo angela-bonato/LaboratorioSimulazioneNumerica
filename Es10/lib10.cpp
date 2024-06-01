@@ -2,7 +2,35 @@
 
 using namespace std;
 
-vector<City> InitCities(ifstream infile){
+bool ReadIthLine(ifstream& inprimes, int i, int& p1, int& p2){
+    if(inprimes.is_open()){
+        string line;
+        int current_line = 0;
+
+        while(current_line < i && getline(inprimes, line)){     //scorro fino ad arrivare alla riga i
+            ++current_line;
+        }
+        
+        if(current_line == i && getline(inprimes, line)){       //leggo riga i-sima e estraggo i valori
+            istringstream iss(line);
+            if(iss >> p1 >> p2) return true;    //tutto andato a buon fine
+            else{
+                cerr << "Errore nella lettura dei valori dalla riga " << i << " di Primes." << std::endl;
+                return false;
+            }
+        } 
+        else {
+            cerr << "Errore: il file Primes non ha abbastanza righe." << std::endl;
+            return false;
+        }
+    }
+    else{
+        cerr << "Errore: impossibile aprire Primes" << endl;
+        return false;
+    }
+}
+
+vector<City> InitCities(ifstream& infile){
     //prendo coordinate città da file, nel codice poi setterò il numero delle città da analizzare in base alla lunghezza del vector di output in modo che sia generale 
     vector<City> vec;
     int i=0;

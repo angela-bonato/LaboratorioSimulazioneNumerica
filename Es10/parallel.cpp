@@ -26,7 +26,7 @@ void sendCityVec(vector<City>& cities, int dest, int tag, MPI_Comm comm) {
     MPI_Type_free(&MPIcity);
 }
 
-void recCityVec(vector<City>& cities, int src, int tag, MPI_Comm comm) {
+void recvCityVec(vector<City>& cities, int src, int tag, MPI_Comm comm) {
     int vsize;
     MPI_Recv(&vsize, 1, MPI_INT, src, tag, comm, MPI_STATUS_IGNORE);
     cities.resize(vsize);
@@ -45,7 +45,7 @@ void sendPath(Path& path, int dest, int tag, MPI_Comm comm) {
     MPI_Send(&Nc, 1, MPI_INT, dest, tag, comm);
 }
 
-void recPath(Path& path, int src, int tag, MPI_Comm comm) {
+void recvPath(Path& path, int src, int tag, MPI_Comm comm) {
     int order_size;
     double loss;
     int Nc;
@@ -57,21 +57,4 @@ void recPath(Path& path, int src, int tag, MPI_Comm comm) {
     path.set_ord(order);
     path.set_loss(loss);
     path.set_Nc(Nc);
-}
-
-void sendPathVec(vector<Path>& paths, int dest, int tag, MPI_Comm comm) {
-    int num_paths=paths.size();
-    MPI_Send(&num_paths, 1, MPI_INT, dest, tag, comm);
-    for (auto& path : paths) {
-        sendPath(path, dest, tag, comm);
-    }
-}
-
-void recPathVec(vector<Path>& paths, int src, int tag, MPI_Comm comm) {
-    int num_paths;
-    MPI_Recv(&num_paths, 1, MPI_INT, src, tag, comm, MPI_STATUS_IGNORE);
-    paths.resize(num_paths);
-    for (auto& path : paths) {
-        recPath(path, src, tag, comm);
-    }
 }
