@@ -76,18 +76,23 @@ int main (int argc, char *argv[]){
     }
 
     //ora rimando le città al processo 0 perchè boh sennò non funziona, non so perchè
-    if(rank==1) sendCityVec(Cities, 0, 4, MPI_COMM_WORLD);
-    else if(rank==0) recvCityVec(Cities, 1, 4, MPI_COMM_WORLD);
+    if(rank==1){
+        sendCityVec(Cities, 0, 4, MPI_COMM_WORLD);
+        cout << "Città ri-mandate al processo " << 0 << endl;
+    } 
+    else if(rank==0){
+        recvCityVec(Cities, 1, 4, MPI_COMM_WORLD);
+        cout << "Città ricevute dal processo " << rank << endl;
+    } 
 
     int Ncities=Cities.size();
-    cout << rank << " " << Ncities << endl;
 
     //inizializzazione generatore casuale su ogni processo con Primes diversi
     Random rand;   
     rand.SetRandom(seed, p1, p2);   //ogni processo inizializza il suo rand
     
     //variabili generali, dovrebbero già definirsi in ogni processo scrivendole qui
-    int Npaths=2500;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
+    int Npaths=9000;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
     int Ntot=3000;     //numero step totali i.e., Nmigr*Ncont (Ncont=numero di migrazioni dopo cui faccio swap)
     int Nmigr=150;    //numero generazioni considerate da ogni processo indipendente (i.e., step in un continente)
     double pc=0.6;  //probabilità di crossover
