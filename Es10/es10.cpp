@@ -92,10 +92,10 @@ int main (int argc, char *argv[]){
     rand.SetRandom(seed, p1, p2);   //ogni processo inizializza il suo rand
     
     //variabili generali, dovrebbero già definirsi in ogni processo scrivendole qui
-    int Npaths=9000;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
-    int Ntot=3000;     //numero step totali i.e., Nmigr*Ncont (Ncont=numero di migrazioni dopo cui faccio swap)
+    int Npaths=7000;  //numero path per ogni generazione in ogni processo DEVONO ESSERE PARI
+    int Ntot=3500;     //numero step totali i.e., Nmigr*Ncont (Ncont=numero di migrazioni dopo cui faccio swap)
     int Nmigr=150;    //numero generazioni considerate da ogni processo indipendente (i.e., step in un continente)
-    double pc=0.6;  //probabilità di crossover
+    double pc=0.8;  //probabilità di crossover
     double pm1=0.07; //probabilità prima mutazione
     double pm2=0.06; //probabilità seconda mutazione
     double pm3=0.05; //probabilità terza mutazione
@@ -121,8 +121,8 @@ int main (int argc, char *argv[]){
 
         //alla fine di ogni continente swappo (questa parte va commentata per fare l'analisi indipendente)
 /*        if(s!=0 && s%Nmigr==0){
-            //il processo principale genera le coppie, ATTENZIONE: QUA FUNZIONA SOLO SE SI AVVIANO ALMENTO 4 PROCESSI
-            int inds[4];
+            //il processo principale genera le coppie, ATTENZIONE: QUA FUNZIONA SOLO SE SI AVVIANO ALMENTO 6 PROCESSI
+            int inds[6];
             if(rank==0){
                 inds[0]=int(rand.Rannyu(0, size));
                 inds[1]=int(rand.Rannyu(0, size));
@@ -131,10 +131,15 @@ int main (int argc, char *argv[]){
                 while(inds[2]==inds[1] || inds[2]==inds[0]) inds[2]=int(rand.Rannyu(0, size));
                 inds[3]=int(rand.Rannyu(0, size));
                 while(inds[3]==inds[0] || inds[3]==inds[1] || inds[3]==inds[2]) inds[3]=int(rand.Rannyu(0, size));
+                inds[4]=int(rand.Rannyu(0, size));
+                while(inds[4]==inds[0] || inds[4]==inds[1] || inds[4]==inds[2] || inds[4]==inds[3]) inds[4]=int(rand.Rannyu(0, size));
+                inds[5]=int(rand.Rannyu(0, size));
+                while(inds[5]==inds[0] || inds[5]==inds[1] || inds[5]==inds[2] || inds[5]==inds[3] || inds[5]==inds[4]) inds[5]=int(rand.Rannyu(0, size));
                 //manda a tutti gli indici
-                for(int k=1; k<size; k++) MPI_Send(inds, 4, MPI_INT, k, 5, MPI_COMM_WORLD);
+                for(int k=1; k<size; k++) MPI_Send(inds, 6, MPI_INT, k, 5, MPI_COMM_WORLD);
             }
-            else MPI_Recv(inds, 4, MPI_INT, 0, 5, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            else MPI_Recv(inds, 6, MPI_INT, 0, 5, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
             Path send=new_population[0];    //ogni rank si copia il proprio best path in una variabile
             //invio best path e ricezione
             if(rank==inds[0]) sendPath(send, inds[1], 6, MPI_COMM_WORLD);
@@ -148,6 +153,12 @@ int main (int argc, char *argv[]){
 
             if(rank==inds[3]) sendPath(send, inds[2], 6, MPI_COMM_WORLD);
             if(rank==inds[2]) recvPath(new_population[0], inds[3], 6, MPI_COMM_WORLD);
+
+            if(rank==inds[4]) sendPath(send, inds[5], 6, MPI_COMM_WORLD);
+            if(rank==inds[5]) recvPath(new_population[0], inds[4], 6, MPI_COMM_WORLD);
+
+            if(rank==inds[5]) sendPath(send, inds[4], 6, MPI_COMM_WORLD);
+            if(rank==inds[4]) recvPath(new_population[0], inds[5], 6, MPI_COMM_WORLD);
             
             if(rank==inds[2]) cout << "Swap " << s/Nmigr <<" fatto." << endl;
         }

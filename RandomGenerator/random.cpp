@@ -43,7 +43,9 @@ double Random :: Gauss(double mean, double sigma) {
 
 double Random :: Rannyu(double min, double max){
    // This function generates a random number in the range [min, max)
-   return min+(max-min)*Rannyu();
+   double r=min+(max-min)*Rannyu();
+   if(r<min || r>max) cerr << "Estrazione Rannyu invalida";
+   return r;
 }
 
 double Random :: Rannyu(void){
@@ -63,6 +65,8 @@ double Random :: Rannyu(void){
   l2 = i2%4096;
   l1 = (i1 + i2/4096)%4096;
   r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
+
+  if(r<0 || r>1) cerr << "Estrazione Rannyu invalida";
 
   return r;
 }
