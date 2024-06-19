@@ -52,7 +52,7 @@ int main (int argc, char *argv[]){
     if(param == 'g'){
         //Esercizio 7.4
         syst.initialize_properties();   //ora devo simulare tutto
-        syst.set_SymDuration(50, 2000);
+        syst.set_SymDuration(50, 200);
         GofrAnalysis(syst);
         cout << "Analisi per esercizio 7.4 conclusa." << endl;
     }
