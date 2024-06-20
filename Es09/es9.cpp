@@ -29,6 +29,7 @@ int main (int argc, char *argv[]){
 
     //problema commesso viaggiatore con città in un quadrato
     cout << "Inizio analisi città quadrate" << endl;
+    Nsteps=400;  //meno banale, servono più generazioni
     vector<City> SqCities=InitSquareCities(Ncities);
     bout.open("sbestloss.dat");
     bhout.open("sbesthalfloss.dat");
