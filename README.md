@@ -10,4 +10,4 @@ Il lavoro riferito alle esercitazioni affrontate durante il corso è organizzato
  - un Jupyter Notebook fornito dal professore con la consegna dell'esercitazione;
  - un Jupyter Notebook `Esercitazione.ipynb` con l'esposizione dello svolgimento della consegna.
 
-Tutti i file relativi al generatore di numeri casuali sono raccolti nella cartella `RandomGenerator/`, mentre i file `libGen.h` e `libGen.cpp` contengono alcune funzioni che ho utilizzato nel corso di più esercitazioni.
+Tutti i file relativi al generatore di numeri casuali sono raccolti nella cartella `RandomGenerator`, mentre i file `libGen.h` e `libGen.cpp` contengono alcune funzioni che ho utilizzato nel corso di più esercitazioni.
